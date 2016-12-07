@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zehin.vpaas.mapper.DECRegistrationContentMapper">
+
+	<resultMap id="rtmpDECRegistrationContent" type="com.zehin.vpaas.beans.DECRegistrationContent" >
+				<id column="Srno" property="srno" />
+				<result column="RegNo" property="regNo" />
+				<result column="IDCard" property="iDCard" />
+				<result column="HealthCard" property="healthCard" />
+				<result column="PatientName" property="patientName" />
+				<result column="PatientType" property="patientType" />
+				<result column="HospitalCode" property="hospitalCode" />
+				<result column="HospitalName" property="hospitalName" />
+				<result column="TreatmentType" property="treatmentType" />
+				<result column="RegTypeCode" property="regTypeCode" />
+				<result column="RegTypeName" property="regTypeName" />
+				<result column="IsApp" property="isApp" />
+				<result column="AppTypeCode" property="appTypeCode" />
+				<result column="AppTypeName" property="appTypeName" />
+				<result column="RegDate" property="regDate" />
+				<result column="DeptCode" property="deptCode" />
+				<result column="DeptName" property="deptName" />
+				<result column="GenderCode" property="genderCode" />
+				<result column="GenderName" property="genderName" />
+				<result column="BirthDay" property="birthDay" />
+				<result column="ClinicFee" property="clinicFee" />
+				<result column="RegFee" property="regFee" />
+				<result column="BookFee" property="bookFee" />
+				<result column="OtherFee" property="otherFee" />
+				<result column="RegFlag" property="regFlag" />
+				<result column="OperatorCode" property="operatorCode" />
+				<result column="OperatorName" property="operatorName" />
+				<result column="SubmitDate" property="submitDate" />
+				<result column="RecordDate" property="recordDate" />
+				<result column="ContactPhone" property="contactPhone" />
+				<result column="ContactAddress" property="contactAddress" />
+				<result column="create_time" property="createTime" />
+				<result column="creater_id" property="createrId" />
+				<result column="update_time" property="updateTime" />
+				<result column="updator_id" property="updatorId" />
+  	</resultMap>
+  	
+  	<sql id="Base_Column_List" >
+	  		Srno,
+	  		RegNo,
+	  		IDCard,
+	  		HealthCard,
+	  		PatientName,
+	  		PatientType,
+	  		HospitalCode,
+	  		HospitalName,
+	  		TreatmentType,
+	  		RegTypeCode,
+	  		RegTypeName,
+	  		IsApp,
+	  		AppTypeCode,
+	  		AppTypeName,
+	  		RegDate,
+	  		DeptCode,
+	  		DeptName,
+	  		GenderCode,
+	  		GenderName,
+	  		BirthDay,
+	  		ClinicFee,
+	  		RegFee,
+	  		BookFee,
+	  		OtherFee,
+	  		RegFlag,
+	  		OperatorCode,
+	  		OperatorName,
+	  		SubmitDate,
+	  		RecordDate,
+	  		ContactPhone,
+	  		ContactAddress,
+	  		create_time,
+			creater_id,
+			update_time,
+			updator_id
+ 	</sql>
+ 	
+ 	
+ 	<!-- 根据id查询 -->
+	<select id="selectByPrimaryKey" resultMap="rtmpDECRegistrationContent">
+	    SELECT 
+	    <include refid="Base_Column_List" />
+	    FROM D_E_C_REGISTRATION_CONTENT
+	    WHERE Srno = #{srno}
+ 	 </select>
+	
+	<!-- 查询所有 -->
+	<select id="findAll" resultMap="rtmpDECRegistrationContent" 
+	    parameterType="com.zehin.vpaas.beans.DECRegistrationContent">
+		select
+		<include refid="Base_Column_List" />
+		from DECREGISTRATION_CONTENT
+	</select>
+
+	<!-- 批量删除 -->
+	<delete id="deleteBT" parameterType="java.lang.String">
+		DELETE FROM
+		D_E_C_REGISTRATION_CONTENT
+		WHERE 
+			Srno
+		IN
+		<foreach item="idItem" collection="array" open="(" separator="," close=")">
+			'${idItem}'
+		</foreach>
+	</delete>
+	
+	<!-- 选择性插入数据 -->
+	<insert id="insertSelective" parameterType="com.zehin.vpaas.beans.DECRegistrationContent">
+		INSERT INTO DECREGISTRATION_CONTENT
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="srno != null">
+					Srno,
+				</if>
+				<if test="regNo != null">
+					RegNo,
+				</if>
+				<if test="iDCard != null">
+					IDCard,
+				</if>
+				<if test="healthCard != null">
+					HealthCard,
+				</if>
+				<if test="patientName != null">
+					PatientName,
+				</if>
+				<if test="patientType != null">
+					PatientType,
+				</if>
+				<if test="hospitalCode != null">
+					HospitalCode,
+				</if>
+				<if test="hospitalName != null">
+					HospitalName,
+				</if>
+				<if test="treatmentType != null">
+					TreatmentType,
+				</if>
+				<if test="regTypeCode != null">
+					RegTypeCode,
+				</if>
+				<if test="regTypeName != null">
+					RegTypeName,
+				</if>
+				<if test="isApp != null">
+					IsApp,
+				</if>
+				<if test="appTypeCode != null">
+					AppTypeCode,
+				</if>
+				<if test="appTypeName != null">
+					AppTypeName,
+				</if>
+				<if test="regDate != null">
+					RegDate,
+				</if>
+				<if test="deptCode != null">
+					DeptCode,
+				</if>
+				<if test="deptName != null">
+					DeptName,
+				</if>
+				<if test="genderCode != null">
+					GenderCode,
+				</if>
+				<if test="genderName != null">
+					GenderName,
+				</if>
+				<if test="birthDay != null">
+					BirthDay,
+				</if>
+				<if test="clinicFee != null">
+					ClinicFee,
+				</if>
+				<if test="regFee != null">
+					RegFee,
+				</if>
+				<if test="bookFee != null">
+					BookFee,
+				</if>
+				<if test="otherFee != null">
+					OtherFee,
+				</if>
+				<if test="regFlag != null">
+					RegFlag,
+				</if>
+				<if test="operatorCode != null">
+					OperatorCode,
+				</if>
+				<if test="operatorName != null">
+					OperatorName,
+				</if>
+				<if test="submitDate != null">
+					SubmitDate,
+				</if>
+				<if test="recordDate != null">
+					RecordDate,
+				</if>
+				<if test="contactPhone != null">
+					ContactPhone,
+				</if>
+				<if test="contactAddress != null">
+					ContactAddress,
+				</if>
+		  		<if test="createTime != null">
+					create_time,
+				</if>
+				<if test="createrId != null">
+					creater_id,
+				</if>
+				<if test="updateTime != null">
+					update_time,
+				</if>
+				<if test="updatorId != null">
+					updator_id,
+				</if>
+		</trim>
+		<trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+				<if test="srno != null">
+					#{srno},
+				</if>
+				<if test="regNo != null">
+					#{regNo},
+				</if>
+				<if test="iDCard != null">
+					#{iDCard},
+				</if>
+				<if test="healthCard != null">
+					#{healthCard},
+				</if>
+				<if test="patientName != null">
+					#{patientName},
+				</if>
+				<if test="patientType != null">
+					#{patientType},
+				</if>
+				<if test="hospitalCode != null">
+					#{hospitalCode},
+				</if>
+				<if test="hospitalName != null">
+					#{hospitalName},
+				</if>
+				<if test="treatmentType != null">
+					#{treatmentType},
+				</if>
+				<if test="regTypeCode != null">
+					#{regTypeCode},
+				</if>
+				<if test="regTypeName != null">
+					#{regTypeName},
+				</if>
+				<if test="isApp != null">
+					#{isApp},
+				</if>
+				<if test="appTypeCode != null">
+					#{appTypeCode},
+				</if>
+				<if test="appTypeName != null">
+					#{appTypeName},
+				</if>
+				<if test="regDate != null">
+					#{regDate},
+				</if>
+				<if test="deptCode != null">
+					#{deptCode},
+				</if>
+				<if test="deptName != null">
+					#{deptName},
+				</if>
+				<if test="genderCode != null">
+					#{genderCode},
+				</if>
+				<if test="genderName != null">
+					#{genderName},
+				</if>
+				<if test="birthDay != null">
+					#{birthDay},
+				</if>
+				<if test="clinicFee != null">
+					#{clinicFee},
+				</if>
+				<if test="regFee != null">
+					#{regFee},
+				</if>
+				<if test="bookFee != null">
+					#{bookFee},
+				</if>
+				<if test="otherFee != null">
+					#{otherFee},
+				</if>
+				<if test="regFlag != null">
+					#{regFlag},
+				</if>
+				<if test="operatorCode != null">
+					#{operatorCode},
+				</if>
+				<if test="operatorName != null">
+					#{operatorName},
+				</if>
+				<if test="submitDate != null">
+					#{submitDate},
+				</if>
+				<if test="recordDate != null">
+					#{recordDate},
+				</if>
+				<if test="contactPhone != null">
+					#{contactPhone},
+				</if>
+				<if test="contactAddress != null">
+					#{contactAddress},
+				</if>
+	  			<if test="createTime != null">
+					#{createTime},
+				</if>
+				<if test="createrId != null">
+					#{createrId},
+				</if>
+				<if test="updateTime != null">
+					#{updateTime},
+				</if>
+				<if test="updatorId != null">
+					#{updatorId},
+				</if>
+		</trim>
+	</insert>
+	
+	<!-- 保存 -->
+	<update id="updateByPrimaryKeySelective" parameterType="com.zehin.vpaas.beans.DECRegistrationContent">
+		UPDATE DECREGISTRATION_CONTENT
+		<set>
+				<if test="srno != null">
+					Srno = #{srno},
+				</if>
+				<if test="regNo != null">
+					RegNo = #{regNo},
+				</if>
+				<if test="iDCard != null">
+					IDCard = #{iDCard},
+				</if>
+				<if test="healthCard != null">
+					HealthCard = #{healthCard},
+				</if>
+				<if test="patientName != null">
+					PatientName = #{patientName},
+				</if>
+				<if test="patientType != null">
+					PatientType = #{patientType},
+				</if>
+				<if test="hospitalCode != null">
+					HospitalCode = #{hospitalCode},
+				</if>
+				<if test="hospitalName != null">
+					HospitalName = #{hospitalName},
+				</if>
+				<if test="treatmentType != null">
+					TreatmentType = #{treatmentType},
+				</if>
+				<if test="regTypeCode != null">
+					RegTypeCode = #{regTypeCode},
+				</if>
+				<if test="regTypeName != null">
+					RegTypeName = #{regTypeName},
+				</if>
+				<if test="isApp != null">
+					IsApp = #{isApp},
+				</if>
+				<if test="appTypeCode != null">
+					AppTypeCode = #{appTypeCode},
+				</if>
+				<if test="appTypeName != null">
+					AppTypeName = #{appTypeName},
+				</if>
+				<if test="regDate != null">
+					RegDate = #{regDate},
+				</if>
+				<if test="deptCode != null">
+					DeptCode = #{deptCode},
+				</if>
+				<if test="deptName != null">
+					DeptName = #{deptName},
+				</if>
+				<if test="genderCode != null">
+					GenderCode = #{genderCode},
+				</if>
+				<if test="genderName != null">
+					GenderName = #{genderName},
+				</if>
+				<if test="birthDay != null">
+					BirthDay = #{birthDay},
+				</if>
+				<if test="clinicFee != null">
+					ClinicFee = #{clinicFee},
+				</if>
+				<if test="regFee != null">
+					RegFee = #{regFee},
+				</if>
+				<if test="bookFee != null">
+					BookFee = #{bookFee},
+				</if>
+				<if test="otherFee != null">
+					OtherFee = #{otherFee},
+				</if>
+				<if test="regFlag != null">
+					RegFlag = #{regFlag},
+				</if>
+				<if test="operatorCode != null">
+					OperatorCode = #{operatorCode},
+				</if>
+				<if test="operatorName != null">
+					OperatorName = #{operatorName},
+				</if>
+				<if test="submitDate != null">
+					SubmitDate = #{submitDate},
+				</if>
+				<if test="recordDate != null">
+					RecordDate = #{recordDate},
+				</if>
+				<if test="contactPhone != null">
+					ContactPhone = #{contactPhone},
+				</if>
+				<if test="contactAddress != null">
+					ContactAddress = #{contactAddress},
+				</if>
+	  			<if test="createTime != null">
+					create_time = #{createTime},
+				</if>
+				<if test="createrId != null">
+					creater_id = #{createrId},
+				</if>
+				<if test="updateTime != null">
+					update_time = #{updateTime},
+				</if>
+				<if test="updatorId != null">
+					updator_id = #{updatorId},
+				</if>
+		</set>
+		WHERE 
+			Srno= #{srno}
+	</update>
+	
+</mapper>
