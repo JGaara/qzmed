@@ -49,7 +49,15 @@ public class DecTest {
 	
 	@Test
 	public void testInsert(){
-		
+		DECRegistrationContent content=new DECRegistrationContent();
+		content.setSrno("1692");
+		content.setRegNo("540003859");
+		decRegistrationContentService.insert(content);
 	}
 
+	@Test
+	public void testSelect(){
+		DECRegistrationContent content=decRegistrationContentService.selectById("1692");
+		System.out.println(content.getRegNo());
+	}
 }

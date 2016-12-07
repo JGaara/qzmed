@@ -36,10 +36,7 @@
 				<result column="RecordDate" property="recordDate" />
 				<result column="ContactPhone" property="contactPhone" />
 				<result column="ContactAddress" property="contactAddress" />
-				<result column="create_time" property="createTime" />
-				<result column="creater_id" property="createrId" />
-				<result column="update_time" property="updateTime" />
-				<result column="updator_id" property="updatorId" />
+			
   	</resultMap>
   	
   	<sql id="Base_Column_List" >
@@ -73,11 +70,8 @@
 	  		SubmitDate,
 	  		RecordDate,
 	  		ContactPhone,
-	  		ContactAddress,
-	  		create_time,
-			creater_id,
-			update_time,
-			updator_id
+	  		ContactAddress
+	  	
  	</sql>
  	
  	
@@ -85,7 +79,7 @@
 	<select id="selectByPrimaryKey" resultMap="rtmpDECRegistrationContent">
 	    SELECT 
 	    <include refid="Base_Column_List" />
-	    FROM D_E_C_REGISTRATION_CONTENT
+	    FROM DECREGISTRATIONCONTENT
 	    WHERE Srno = #{srno}
  	 </select>
 	
@@ -94,13 +88,13 @@
 	    parameterType="com.zehin.vpaas.beans.DECRegistrationContent">
 		select
 		<include refid="Base_Column_List" />
-		from DECREGISTRATION_CONTENT
+		from DECREGISTRATIONCONTENT
 	</select>
 
 	<!-- 批量删除 -->
 	<delete id="deleteBT" parameterType="java.lang.String">
 		DELETE FROM
-		D_E_C_REGISTRATION_CONTENT
+		DECREGISTRATIONCONTENT
 		WHERE 
 			Srno
 		IN
@@ -111,332 +105,299 @@
 	
 	<!-- 选择性插入数据 -->
 	<insert id="insertSelective" parameterType="com.zehin.vpaas.beans.DECRegistrationContent">
-		INSERT INTO DECREGISTRATION_CONTENT
+		INSERT INTO DECREGISTRATIONCONTENT
 		<trim prefix="(" suffix=")" suffixOverrides=",">
-				<if test="srno != null">
+				<if test="Srno != null">
 					Srno,
 				</if>
-				<if test="regNo != null">
+				<if test="RegNo != null">
 					RegNo,
 				</if>
-				<if test="iDCard != null">
+				<if test="IDCard != null">
 					IDCard,
 				</if>
-				<if test="healthCard != null">
+				<if test="HealthCard != null">
 					HealthCard,
 				</if>
-				<if test="patientName != null">
+				<if test="PatientName != null">
 					PatientName,
 				</if>
-				<if test="patientType != null">
+				<if test="PatientType != null">
 					PatientType,
 				</if>
-				<if test="hospitalCode != null">
+				<if test="HospitalCode != null">
 					HospitalCode,
 				</if>
-				<if test="hospitalName != null">
+				<if test="HospitalName != null">
 					HospitalName,
 				</if>
-				<if test="treatmentType != null">
+				<if test="TreatmentType != null">
 					TreatmentType,
 				</if>
-				<if test="regTypeCode != null">
+				<if test="RegTypeCode != null">
 					RegTypeCode,
 				</if>
-				<if test="regTypeName != null">
+				<if test="RegTypeName != null">
 					RegTypeName,
 				</if>
-				<if test="isApp != null">
+				<if test="IsApp != null">
 					IsApp,
 				</if>
-				<if test="appTypeCode != null">
+				<if test="AppTypeCode != null">
 					AppTypeCode,
 				</if>
-				<if test="appTypeName != null">
+				<if test="AppTypeName != null">
 					AppTypeName,
 				</if>
-				<if test="regDate != null">
+				<if test="RegDate != null">
 					RegDate,
 				</if>
-				<if test="deptCode != null">
+				<if test="DeptCode != null">
 					DeptCode,
 				</if>
-				<if test="deptName != null">
+				<if test="DeptName != null">
 					DeptName,
 				</if>
-				<if test="genderCode != null">
+				<if test="GenderCode != null">
 					GenderCode,
 				</if>
-				<if test="genderName != null">
+				<if test="GenderName != null">
 					GenderName,
 				</if>
-				<if test="birthDay != null">
+				<if test="BirthDay != null">
 					BirthDay,
 				</if>
-				<if test="clinicFee != null">
+				<if test="ClinicFee != null">
 					ClinicFee,
 				</if>
-				<if test="regFee != null">
+				<if test="RegFee != null">
 					RegFee,
 				</if>
-				<if test="bookFee != null">
+				<if test="BookFee != null">
 					BookFee,
 				</if>
-				<if test="otherFee != null">
+				<if test="OtherFee != null">
 					OtherFee,
 				</if>
-				<if test="regFlag != null">
+				<if test="RegFlag != null">
 					RegFlag,
 				</if>
-				<if test="operatorCode != null">
+				<if test="OperatorCode != null">
 					OperatorCode,
 				</if>
-				<if test="operatorName != null">
+				<if test="OperatorName != null">
 					OperatorName,
 				</if>
-				<if test="submitDate != null">
+				<if test="SubmitDate != null">
 					SubmitDate,
 				</if>
-				<if test="recordDate != null">
+				<if test="RecordDate != null">
 					RecordDate,
 				</if>
 				<if test="contactPhone != null">
 					ContactPhone,
 				</if>
-				<if test="contactAddress != null">
+				<if test="ContactAddress != null">
 					ContactAddress,
 				</if>
-		  		<if test="createTime != null">
-					create_time,
-				</if>
-				<if test="createrId != null">
-					creater_id,
-				</if>
-				<if test="updateTime != null">
-					update_time,
-				</if>
-				<if test="updatorId != null">
-					updator_id,
-				</if>
+		  		
 		</trim>
 		<trim prefix="VALUES (" suffix=")" suffixOverrides=",">
-				<if test="srno != null">
-					#{srno},
+				<if test="Srno != null">
+					#{Srno},
 				</if>
-				<if test="regNo != null">
-					#{regNo},
+				<if test="RegNo != null">
+					#{RegNo},
 				</if>
-				<if test="iDCard != null">
-					#{iDCard},
+				<if test="IDCard != null">
+					#{IDCard},
 				</if>
-				<if test="healthCard != null">
-					#{healthCard},
+				<if test="HealthCard != null">
+					#{HealthCard},
 				</if>
-				<if test="patientName != null">
-					#{patientName},
+				<if test="PatientName != null">
+					#{PatientName},
 				</if>
-				<if test="patientType != null">
-					#{patientType},
+				<if test="PatientType != null">
+					#{PatientType},
 				</if>
-				<if test="hospitalCode != null">
-					#{hospitalCode},
+				<if test="HospitalCode != null">
+					#{HospitalCode},
 				</if>
-				<if test="hospitalName != null">
-					#{hospitalName},
+				<if test="HospitalName != null">
+					#{HospitalName},
 				</if>
-				<if test="treatmentType != null">
-					#{treatmentType},
+				<if test="TreatmentType != null">
+					#{TreatmentType},
 				</if>
-				<if test="regTypeCode != null">
-					#{regTypeCode},
+				<if test="RegTypeCode != null">
+					#{RegTypeCode},
 				</if>
-				<if test="regTypeName != null">
-					#{regTypeName},
+				<if test="RegTypeName != null">
+					#{RegTypeName},
 				</if>
-				<if test="isApp != null">
-					#{isApp},
+				<if test="IsApp != null">
+					#{IsApp},
 				</if>
-				<if test="appTypeCode != null">
-					#{appTypeCode},
+				<if test="AppTypeCode != null">
+					#{AppTypeCode},
 				</if>
-				<if test="appTypeName != null">
-					#{appTypeName},
+				<if test="AppTypeName != null">
+					#{AppTypeName},
 				</if>
-				<if test="regDate != null">
-					#{regDate},
+				<if test="RegDate != null">
+					#{RegDate},
 				</if>
-				<if test="deptCode != null">
-					#{deptCode},
+				<if test="DeptCode != null">
+					#{DeptCode},
 				</if>
-				<if test="deptName != null">
-					#{deptName},
+				<if test="DeptName != null">
+					#{DeptName},
 				</if>
-				<if test="genderCode != null">
-					#{genderCode},
+				<if test="GenderCode != null">
+					#{GenderCode},
 				</if>
-				<if test="genderName != null">
-					#{genderName},
+				<if test="GenderName != null">
+					#{GenderName},
 				</if>
-				<if test="birthDay != null">
-					#{birthDay},
+				<if test="BirthDay != null">
+					#{BirthDay},
 				</if>
-				<if test="clinicFee != null">
-					#{clinicFee},
+				<if test="ClinicFee != null">
+					#{ClinicFee},
 				</if>
-				<if test="regFee != null">
-					#{regFee},
+				<if test="RegFee != null">
+					#{RegFee},
 				</if>
-				<if test="bookFee != null">
-					#{bookFee},
+				<if test="BookFee != null">
+					#{BookFee},
 				</if>
-				<if test="otherFee != null">
-					#{otherFee},
+				<if test="OtherFee != null">
+					#{OtherFee},
 				</if>
-				<if test="regFlag != null">
-					#{regFlag},
+				<if test="RegFlag != null">
+					#{RegFlag},
 				</if>
-				<if test="operatorCode != null">
-					#{operatorCode},
+				<if test="OperatorCode != null">
+					#{OperatorCode},
 				</if>
-				<if test="operatorName != null">
-					#{operatorName},
+				<if test="OperatorName != null">
+					#{OperatorName},
 				</if>
-				<if test="submitDate != null">
-					#{submitDate},
+				<if test="SubmitDate != null">
+					#{SubmitDate},
 				</if>
-				<if test="recordDate != null">
-					#{recordDate},
+				<if test="RecordDate != null">
+					#{RecordDate},
 				</if>
-				<if test="contactPhone != null">
-					#{contactPhone},
+				<if test="ContactPhone != null">
+					#{ContactPhone},
 				</if>
-				<if test="contactAddress != null">
-					#{contactAddress},
+				<if test="ContactAddress != null">
+					#{ContactAddress},
 				</if>
-	  			<if test="createTime != null">
-					#{createTime},
-				</if>
-				<if test="createrId != null">
-					#{createrId},
-				</if>
-				<if test="updateTime != null">
-					#{updateTime},
-				</if>
-				<if test="updatorId != null">
-					#{updatorId},
-				</if>
+	  		
 		</trim>
 	</insert>
 	
 	<!-- 保存 -->
 	<update id="updateByPrimaryKeySelective" parameterType="com.zehin.vpaas.beans.DECRegistrationContent">
-		UPDATE DECREGISTRATION_CONTENT
+		UPDATE DECREGISTRATIONCONTENT
 		<set>
-				<if test="srno != null">
-					Srno = #{srno},
+				<if test="Srno != null">
+					Srno = #{Srno},
 				</if>
-				<if test="regNo != null">
-					RegNo = #{regNo},
+				<if test="RegNo != null">
+					RegNo = #{RegNo},
 				</if>
-				<if test="iDCard != null">
-					IDCard = #{iDCard},
+				<if test="IDCard != null">
+					IDCard = #{IDCard},
 				</if>
-				<if test="healthCard != null">
-					HealthCard = #{healthCard},
+				<if test="HealthCard != null">
+					HealthCard = #{HealthCard},
 				</if>
-				<if test="patientName != null">
-					PatientName = #{patientName},
+				<if test="PatientName != null">
+					PatientName = #{PatientName},
 				</if>
-				<if test="patientType != null">
-					PatientType = #{patientType},
+				<if test="PatientType != null">
+					PatientType = #{PatientType},
 				</if>
-				<if test="hospitalCode != null">
-					HospitalCode = #{hospitalCode},
+				<if test="HospitalCode != null">
+					HospitalCode = #{HospitalCode},
 				</if>
-				<if test="hospitalName != null">
-					HospitalName = #{hospitalName},
+				<if test="HospitalName != null">
+					HospitalName = #{HospitalName},
 				</if>
-				<if test="treatmentType != null">
-					TreatmentType = #{treatmentType},
+				<if test="TreatmentType != null">
+					TreatmentType = #{TreatmentType},
 				</if>
-				<if test="regTypeCode != null">
-					RegTypeCode = #{regTypeCode},
+				<if test="RegTypeCode != null">
+					RegTypeCode = #{RegTypeCode},
 				</if>
-				<if test="regTypeName != null">
-					RegTypeName = #{regTypeName},
+				<if test="RegTypeName != null">
+					RegTypeName = #{RegTypeName},
 				</if>
-				<if test="isApp != null">
-					IsApp = #{isApp},
+				<if test="IsApp != null">
+					IsApp = #{IsApp},
 				</if>
-				<if test="appTypeCode != null">
-					AppTypeCode = #{appTypeCode},
+				<if test="AppTypeCode != null">
+					AppTypeCode = #{AppTypeCode},
 				</if>
-				<if test="appTypeName != null">
-					AppTypeName = #{appTypeName},
+				<if test="AppTypeName != null">
+					AppTypeName = #{AppTypeName},
 				</if>
-				<if test="regDate != null">
-					RegDate = #{regDate},
+				<if test="RegDate != null">
+					RegDate = #{RegDate},
 				</if>
-				<if test="deptCode != null">
-					DeptCode = #{deptCode},
+				<if test="DeptCode != null">
+					DeptCode = #{DeptCode},
 				</if>
-				<if test="deptName != null">
-					DeptName = #{deptName},
+				<if test="DeptName != null">
+					DeptName = #{DeptName},
 				</if>
-				<if test="genderCode != null">
-					GenderCode = #{genderCode},
+				<if test="GenderCode != null">
+					GenderCode = #{GenderCode},
 				</if>
-				<if test="genderName != null">
-					GenderName = #{genderName},
+				<if test="GenderName != null">
+					GenderName = #{GenderName},
 				</if>
-				<if test="birthDay != null">
+				<if test="BirthDay != null">
 					BirthDay = #{birthDay},
 				</if>
-				<if test="clinicFee != null">
-					ClinicFee = #{clinicFee},
+				<if test="ClinicFee != null">
+					ClinicFee = #{ClinicFee},
 				</if>
-				<if test="regFee != null">
-					RegFee = #{regFee},
+				<if test="RegFee != null">
+					RegFee = #{RegFee},
 				</if>
-				<if test="bookFee != null">
-					BookFee = #{bookFee},
+				<if test="BookFee != null">
+					BookFee = #{BookFee},
 				</if>
-				<if test="otherFee != null">
-					OtherFee = #{otherFee},
+				<if test="OtherFee != null">
+					OtherFee = #{OtherFee},
 				</if>
-				<if test="regFlag != null">
-					RegFlag = #{regFlag},
+				<if test="RegFlag != null">
+					RegFlag = #{RegFlag},
 				</if>
-				<if test="operatorCode != null">
-					OperatorCode = #{operatorCode},
+				<if test="OperatorCode != null">
+					OperatorCode = #{OperatorCode},
 				</if>
-				<if test="operatorName != null">
-					OperatorName = #{operatorName},
+				<if test="OperatorName != null">
+					OperatorName = #{OperatorName},
 				</if>
-				<if test="submitDate != null">
-					SubmitDate = #{submitDate},
+				<if test="SubmitDate != null">
+					SubmitDate = #{SubmitDate},
 				</if>
-				<if test="recordDate != null">
-					RecordDate = #{recordDate},
+				<if test="RecordDate != null">
+					RecordDate = #{RecordDate},
 				</if>
-				<if test="contactPhone != null">
-					ContactPhone = #{contactPhone},
+				<if test="ContactPhone != null">
+					ContactPhone = #{ContactPhone},
 				</if>
-				<if test="contactAddress != null">
-					ContactAddress = #{contactAddress},
+				<if test="ContactAddress != null">
+					ContactAddress = #{ContactAddress},
 				</if>
-	  			<if test="createTime != null">
-					create_time = #{createTime},
-				</if>
-				<if test="createrId != null">
-					creater_id = #{createrId},
-				</if>
-				<if test="updateTime != null">
-					update_time = #{updateTime},
-				</if>
-				<if test="updatorId != null">
-					updator_id = #{updatorId},
-				</if>
+	  			
 		</set>
 		WHERE 
 			Srno= #{srno}
