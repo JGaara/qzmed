@@ -2,6 +2,10 @@ package com.zehin.vpaas.generic;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
+
+import com.zehin.vpaas.beans.ViewAccessState;
+
 /**
  * 所有自定义Dao的顶级接口, 封装常用的增删查改操作,
  * <p/>
@@ -69,6 +73,9 @@ public interface BaseDao<Model, PK> {
 	 * @return List<Model>
 	 * @throws
 	 */
-	List<Model> findByPage(Model model);
+	List<Model> findByPage(ViewAccessState state);
+	
+	List<Model> findAll(Model model);
+	
 
 }

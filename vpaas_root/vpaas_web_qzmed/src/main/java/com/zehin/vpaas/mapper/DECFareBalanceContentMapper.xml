@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.zehin.vpaas.mapper.DECFareBalanceContentMapper">
+	
+	<resultMap id="rtmpDECFareBalanceContent" type="com.zehin.vpaas.beans.DECFareBalanceContent" >
+				<id column="Srno" property="Srno" />
+				<result column="RegNo" property="RegNo" />
+				<result column="IDCard" property="IDCard" />
+				<result column="HealthCard" property="healthCard" />
+				<result column="PatientName" property="patientName" />
+				
+				<result column="HospitalCode" property="HospitalCode" />
+				<result column="HospitalName" property="HospitalName" />
+				<result column="InvoiceCode" property="InvoiceCode" />
+				<result column="ExecDate" property="ExecDate" />
+				<result column="ExeDeptCode" property="ExeDeptCode" />
+				
+				<result column="ExeDeptName" property="ExeDeptName" />
+				<result column="BalOperCode" property="BalOperCode" />
+				<result column="BalOperName" property="BalOperName" />
+				<result column="TotalAmount" property="TotalAmount" />
+				<result column="RealAmount" property="RealAmount" />
+				
+				<result column="PayTypeCode" property="PayTypeCode" />
+				<result column="PayTypeName" property="PayTypeName" />
+				<result column="Remark" property="Remark" />
+				<result column="OperatorCode" property="OperatorCode" />
+				<result column="OperatorName" property="OperatorName" />
+				
+				<result column="SubmitDate" property="SubmitDate"  jdbcType="TIMESTAMP"/>
+				<result column="RecordState" property="RecordState" />
+			
+  	</resultMap>
+  	
+  	<sql id="Base_Column_List" >
+	  		Srno,
+			RegNo,
+			IDCard,
+			HealthCard,
+			PatientName,
+			
+			HospitalCode,
+			HospitalName,
+			InvoiceCode,
+			ExecDate,	
+			ExeDeptCode,
+			
+			ExeDeptName,
+			BalOperCode,
+			BalOperName,	
+			TotalAmount,	
+			RealAmount,
+			
+			PayTypeCode,
+			PayTypeName,
+			Remark,	
+			OperatorCode,
+			OperatorName,
+			
+			SubmitDate,
+			RecordState
+	  	
+ 	</sql>
+ 	
+ 	
+ 	<!-- 根据id查询 -->
+	<select id="selectByPrimaryKey" resultMap="rtmpDECFareBalanceContent">
+	    SELECT 
+	    <include refid="Base_Column_List" />
+	    FROM V_MZ_FYJS
+	    WHERE Srno = #{srno}
+ 	 </select>
+	
+	<!-- 查询所有 -->
+	<select id="findAll" resultMap="rtmpDECFareBalanceContent" 
+	    parameterType="com.zehin.vpaas.beans.DECFareBalanceContent">
+		select
+		<include refid="Base_Column_List" />
+		from V_MZ_FYJS
+	</select>
+	<select id="findByPage" resultMap="rtmpDECFareBalanceContent" 
+	    parameterType="com.zehin.vpaas.beans.ViewAccessState">
+		select
+		<include refid="Base_Column_List" />
+		from V_MZ_FYJS where convert(varchar(19),SubmitDate,120) > #{SubmitDate} order by SubmitDate
+	</select>
+	<!-- 批量删除 -->
+	<delete id="deleteBT" parameterType="java.lang.String">
+		DELETE FROM
+		V_MZ_FYJS
+		WHERE 
+			Srno
+		IN
+		<foreach item="idItem" collection="array" open="(" separator="," close=")">
+			'${idItem}'
+		</foreach>
+	</delete>
+	
+	<!-- 选择性插入数据 -->
+	<insert id="insertSelective" parameterType="com.zehin.vpaas.beans.DECFareBalanceContent">
+		INSERT INTO V_MZ_FYJS
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="Srno != null">
+					Srno,
+				</if>
+				<if test="RegNo != null">
+					RegNo,
+				</if>
+				<if test="IDCard != null">
+					IDCard,
+				</if>
+				<if test="HealthCard != null">
+					HealthCard,
+				</if>
+				<if test="PatientName != null">
+					PatientName,
+				</if>
+				<if test="PatientType != null">
+					PatientType,
+				</if>
+				<if test="HospitalCode != null">
+					HospitalCode,
+				</if>
+				<if test="HospitalName != null">
+					HospitalName,
+				</if>
+				<if test="InvoiceCode != null">
+					InvoiceCode,
+				</if>
+				<if test="ExecDate != null">
+					ExecDate,
+				</if>
+				<if test="ExeDeptCode != null">
+					ExeDeptCode,
+				</if>
+				<if test="ExeDeptName != null">
+					ExeDeptName,
+				</if>
+				<if test="BalOperCode != null">
+					BalOperCode,
+				</if>
+				<if test="BalOperName != null">
+					BalOperName,
+				</if>
+				<if test="TotalAmount != null">
+					TotalAmount,
+				</if>
+				<if test="RealAmount != null">
+					RealAmount,
+				</if>
+				<if test="PayTypeCode != null">
+					PayTypeCode,
+				</if>
+				<if test="PayTypeName != null">
+					PayTypeName,
+				</if>
+				<if test="Remark != null">
+					Remark,
+				</if>
+				<if test="OperatorCode != null">
+					OperatorCode,
+				</if>
+				<if test="OperatorName != null">
+					OperatorName,
+				</if>
+				<if test="SubmitDate != null">
+					SubmitDate,
+				</if>
+				<if test="RecordState != null">
+					RecordState,
+				</if>
+		  		
+		</trim>
+		<trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+				<if test="Srno != null">
+					#{Srno},
+				</if>
+				<if test="RegNo != null">
+					#{RegNo},
+				</if>
+				<if test="IDCard != null">
+					#{IDCard},
+				</if>
+				<if test="HealthCard != null">
+					#{HealthCard},
+				</if>
+				<if test="PatientName != null">
+					#{PatientName},
+				</if>
+				<if test="PatientType != null">
+					#{PatientType},
+				</if>
+				<if test="HospitalCode != null">
+					#{HospitalCode},
+				</if>
+				<if test="HospitalName != null">
+					#{HospitalName},
+				</if>
+				<if test="InvoiceCode != null">
+					#{InvoiceCode},
+				</if>
+				<if test="ExecDate != null">
+					#{ExecDate},
+				</if>
+				<if test="ExeDeptCode != null">
+					#{ExeDeptCode},
+				</if>
+				<if test="ExeDeptName != null">
+					#{ExeDeptName},
+				</if>
+				<if test="BalOperCode != null">
+					#{BalOperCode},
+				</if>
+				<if test="BalOperName != null">
+					#{BalOperName},
+				</if>
+				<if test="TotalAmount != null">
+					#{TotalAmount},
+				</if>
+				<if test="RealAmount != null">
+					#{RealAmount},
+				</if>
+				<if test="PayTypeCode != null">
+					#{PayTypeCode},
+				</if>
+				<if test="PayTypeName != null">
+					#{PayTypeName},
+				</if>
+				<if test="Remark != null">
+					#{Remark},
+				</if>
+				<if test="OperatorCode != null">
+					#{OperatorCode},
+				</if>
+				<if test="OperatorName != null">
+					#{OperatorName},
+				</if>
+				<if test="SubmitDate != null">
+					#{SubmitDate},
+				</if>
+				<if test="RecordState != null">
+					#{RecordState},
+				</if>
+				
+		</trim>
+	</insert>
+	
+	<!-- 保存 -->
+	<update id="updateByPrimaryKeySelective" parameterType="com.zehin.vpaas.beans.DECFareBalanceContent">
+		UPDATE V_MZ_FYJS
+		<set>
+				<if test="Srno != null">
+					Srno = #{Srno},
+				</if>
+				<if test="RegNo != null">
+					RegNo = #{RegNo},
+				</if>
+				<if test="IDCard != null">
+					IDCard = #{IDCard},
+				</if>
+				<if test="HealthCard != null">
+					HealthCard = #{HealthCard},
+				</if>
+				<if test="PatientName != null">
+					PatientName = #{PatientName},
+				</if>
+				<if test="PatientType != null">
+					PatientType = #{PatientType},
+				</if>
+				<if test="HospitalCode != null">
+					HospitalCode = #{HospitalCode},
+				</if>
+				<if test="HospitalName != null">
+					HospitalName = #{HospitalName},
+				</if>
+				<if test="InvoiceCode != null">
+					InvoiceCode = #{InvoiceCode},
+				</if>
+				<if test="ExecDate != null">
+					ExecDate = #{ExecDate},
+				</if>
+				<if test="ExeDeptCode != null">
+					ExeDeptCode = #{ExeDeptCode},
+				</if>
+				<if test="ExeDeptName != null">
+					ExeDeptName = #{ExeDeptName},
+				</if>
+				<if test="BalOperCode != null">
+					BalOperCode = #{BalOperCode},
+				</if>
+				<if test="BalOperName != null">
+					BalOperName = #{BalOperName},
+				</if>
+				<if test="TotalAmount != null">
+					TotalAmount = #{TotalAmount},
+				</if>
+				<if test="RealAmount != null">
+					RealAmount = #{RealAmount},
+				</if>
+				<if test="PayTypeCode != null">
+					PayTypeCode = #{PayTypeCode},
+				</if>
+				<if test="PayTypeName != null">
+					PayTypeName = #{PayTypeName},
+				</if>
+				<if test="Remark != null">
+					Remark = #{Remark},
+				</if>
+				<if test="OperatorCode != null">
+					OperatorCode = #{OperatorCode},
+				</if>
+				<if test="OperatorName != null">
+					OperatorName = #{OperatorName},
+				</if>
+				<if test="SubmitDate != null">
+					SubmitDate = #{SubmitDate},
+				</if>
+				<if test="RecordState != null">
+					RecordState = #{RecordState},
+				</if>
+				
+		</set>
+		WHERE 
+			Srno= #{Srno}
+	</update>
+	
+</mapper>

@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.zehin.vpaas.mapper.DECTreatmentRecordsContentMapper">
+	
+	<resultMap id="rtmpDECTreatmentRecordsContent" type="com.zehin.vpaas.beans.DECTreatmentRecordsContent" >
+				<id column="Srno" property="Srno" />
+				<result column="RegNo" property="RegNo" />
+				<result column="IDCard" property="IDCard" />
+				<result column="HealthCard" property="HealthCard" />
+				<result column="PatientName" property="PatientName" />
+				<result column="HospitalCode" property="HospitalCode" />
+				<result column="HospitalName" property="HospitalName" />
+				<result column="HDiseaseCode" property="HDiseaseCode" />
+				<result column="HDiseaseName" property="HDiseaseName" />
+				<result column="DiseaseCode" property="DiseaseCode" />
+				<result column="DiseaseName" property="DiseaseName" />
+				<result column="ClinicDate" property="ClinicDate" />
+				<result column="DoctorCode" property="DoctorCode" />
+				<result column="DoctorName" property="DoctorName" />
+				<result column="HSecDiseaseCode" property="HSecDiseaseCode" />
+				<result column="HSecDiseaseName" property="HSecDiseaseName" />
+				<result column="SecDiseaseCode" property="SecDiseaseCode" />
+				<result column="SecDiseaseName" property="SecDiseaseName" />
+				<result column="Temperature" property="Temperature" />
+				<result column="Weight" property="Weight" />
+				<result column="SBloodPressure" property="SBloodPressure" />
+				<result column="DBloodPressure" property="DBloodPressure" />
+				<result column="Pulse" property="Pulse" />
+				<result column="CheckDate" property="CheckDate" />
+				<result column="CheckerCode" property="CheckerCode" />
+				<result column="CheckerName" property="CheckerName" />
+				<result column="ClinicDesc" property="ClinicDesc" />
+				<result column="ClinicComplain" property="ClinicComplain" />
+				<result column="SymptomDesc" property="SymptomDesc" />
+				<result column="OperatorCode" property="OperatorCode" />
+				<result column="OperatorName" property="OperatorName" />
+				<result column="SubmitDate" property="SubmitDate"  jdbcType="TIMESTAMP"
+				/>
+				<result column="RecordState" property="RecordState" />
+				<result column="ContactPhone" property="ContactPhone" />
+				<result column="ContactAddress" property="ContactAddress" />
+			
+  	</resultMap>
+  	
+  	<sql id="Base_Column_List" >
+	  		Srno,
+			RegNo,
+			IDCard,
+			HealthCard,
+			PatientName,
+			HospitalCode,
+			HospitalName,
+			HDiseaseCode,
+			HDiseaseName,
+			DiseaseCode,
+			DiseaseName,
+			ClinicDate,
+			DoctorCode,
+			DoctorName,
+			HSecDiseaseCode,
+			HSecDiseaseName,
+			SecDiseaseCode,
+			SecDiseaseName,
+			Temperature,
+			Weight,
+			SBloodPressure,
+			DBloodPressure,
+			Pulse,
+			CheckDate,
+			CheckerCode,
+			CheckerName,
+			ClinicDesc,
+			ClinicComplain,
+			SymptomDesc,
+			OperatorCode,
+			OperatorName,
+			SubmitDate,
+			RecordState
+ 	</sql>
+ 	
+ 	
+ 	<!-- 根据id查询 -->
+	<select id="selectByPrimaryKey" resultMap="rtmpDECTreatmentRecordsContent">
+	    SELECT 
+	    <include refid="Base_Column_List" />
+	    FROM V_MZ_JZJL
+	    WHERE Srno = #{Srno}
+ 	 </select>
+	
+	<!-- 查询所有 -->
+	<select id="findAll" resultMap="rtmpDECTreatmentRecordsContent" 
+	    parameterType="com.zehin.vpaas.beans.DECTreatmentRecordsContent">
+		select
+		<include refid="Base_Column_List" />
+		from V_MZ_JZJL
+	</select>
+	<select id="findByPage" resultMap="rtmpDECTreatmentRecordsContent" 
+	    parameterType="com.zehin.vpaas.beans.ViewAccessState">
+		select
+		<include refid="Base_Column_List" />
+		from V_MZ_JZJL where convert(varchar(19),SubmitDate,120) > #{SubmitDate} order by SubmitDate
+	</select>
+	<!-- 批量删除 -->
+	<delete id="deleteBT" parameterType="java.lang.String">
+		DELETE FROM
+		V_MZ_JZJL
+		WHERE 
+			Srno
+		IN
+		<foreach item="idItem" collection="array" open="(" separator="," close=")">
+			'${idItem}'
+		</foreach>
+	</delete>
+	
+	<!-- 选择性插入数据 -->
+	<insert id="insertSelective" parameterType="com.zehin.vpaas.beans.DECTreatmentRecordsContent">
+		INSERT INTO V_MZ_JZJL
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="Srno != null">
+					Srno,
+				</if>
+				<if test="RegNo != null">
+					RegNo,
+				</if>
+				<if test="IDCard != null">
+					IDCard,
+				</if>
+				<if test="HealthCard != null">
+					HealthCard,
+				</if>
+				<if test="PatientName != null">
+					PatientName,
+				</if>
+				<if test="HospitalCode != null">
+					HospitalCode,
+				</if>
+				<if test="HospitalName != null">
+					HospitalName,
+				</if>
+				<if test="HDiseaseCode != null">
+					HDiseaseCode,
+				</if>
+				<if test="HDiseaseName != null">
+					HDiseaseName,
+				</if>
+				<if test="DiseaseCode != null">
+					DiseaseCode,
+				</if>
+				<if test="DiseaseName != null">
+					DiseaseName,
+				</if>
+				<if test="ClinicDate != null">
+					ClinicDate,
+				</if>
+				<if test="DoctorCode != null">
+					DoctorCode,
+				</if>
+				<if test="DoctorName != null">
+					DoctorName,
+				</if>
+				<if test="HSecDiseaseCode != null">
+					HSecDiseaseCode,
+				</if>
+				<if test="HSecDiseaseName != null">
+					HSecDiseaseName,
+				</if>
+				<if test="SecDiseaseCode != null">
+					SecDiseaseCode,
+				</if>
+				<if test="SecDiseaseName != null">
+					SecDiseaseName,
+				</if>
+				<if test="Temperature != null">
+					Temperature,
+				</if>
+				<if test="Weight != null">
+					Weight,
+				</if>
+				<if test="SBloodPressure != null">
+					SBloodPressure,
+				</if>
+				<if test="DBloodPressure != null">
+					DBloodPressure,
+				</if>
+				<if test="Pulse != null">
+					Pulse,
+				</if>
+				<if test="CheckDate != null">
+					CheckDate,
+				</if>
+				<if test="CheckerCode != null">
+					CheckerCode,
+				</if>
+				<if test="CheckerName != null">
+					CheckerName,
+				</if>
+				<if test="ClinicDesc != null">
+					ClinicDesc,
+				</if>
+				<if test="ClinicComplain != null">
+					ClinicComplain,
+				</if>
+				<if test="SymptomDesc != null">
+					SymptomDesc,
+				</if>
+				<if test="OperatorCode != null">
+					OperatorCode,
+				</if>
+				<if test="OperatorName != null">
+					OperatorName,
+				</if>
+				<if test="SubmitDate != null">
+					SubmitDate,
+				</if>
+				<if test="RecordDate != null">
+					RecordDate,
+				</if>
+		  		
+		</trim>
+		<trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+				<if test="Srno != null">
+					#{Srno},
+				</if>
+				<if test="RegNo != null">
+					#{RegNo},
+				</if>
+				<if test="IDCard != null">
+					#{IDCard},
+				</if>
+				<if test="HealthCard != null">
+					#{HealthCard},
+				</if>
+				<if test="PatientName != null">
+					#{PatientName},
+				</if>
+				<if test="HospitalCode != null">
+					#{HospitalCode},
+				</if>
+				<if test="HospitalName != null">
+					#{HospitalName},
+				</if>
+				<if test="HDiseaseCode != null">
+					#{HDiseaseCode},
+				</if>
+				<if test="HDiseaseName != null">
+					#{HDiseaseName},
+				</if>
+				<if test="DiseaseCode != null">
+					#{DiseaseCode},
+				</if>
+				<if test="DiseaseName != null">
+					#{DiseaseName},
+				</if>
+				<if test="ClinicDate != null">
+					#{ClinicDate},
+				</if>
+				<if test="DoctorCode != null">
+					#{DoctorCode},
+				</if>
+				<if test="DoctorName != null">
+					#{DoctorName},
+				</if>
+				<if test="HSecDiseaseCode != null">
+					#{HSecDiseaseCode},
+				</if>
+				<if test="HSecDiseaseName != null">
+					#{HSecDiseaseName},
+				</if>
+				<if test="SecDiseaseCode != null">
+					#{SecDiseaseCode},
+				</if>
+				<if test="SecDiseaseName != null">
+					#{SecDiseaseName},
+				</if>
+				<if test="Temperature != null">
+					#{Temperature},
+				</if>
+				<if test="Weight != null">
+					#{Weight},
+				</if>
+				<if test="SBloodPressure != null">
+					#{SBloodPressure},
+				</if>
+				<if test="DBloodPressure != null">
+					#{DBloodPressure},
+				</if>
+				<if test="Pulse != null">
+					#{Pulse},
+				</if>
+				<if test="CheckDate != null">
+					#{CheckDate},
+				</if>
+				<if test="CheckerCode != null">
+					#{CheckerCode},
+				</if>
+				<if test="CheckerName != null">
+					#{CheckerName},
+				</if>
+				<if test="ClinicDesc != null">
+					#{ClinicDesc},
+				</if>
+				<if test="ClinicComplain != null">
+					#{ClinicComplain},
+				</if>
+				<if test="SymptomDesc != null">
+					#{SymptomDesc},
+				</if>
+				<if test="OperatorCode != null">
+					#{OperatorCode},
+				</if>
+				<if test="OperatorName != null">
+					#{OperatorName},
+				</if>
+				<if test="SubmitDate != null">
+					#{SubmitDate},
+				</if>
+				<if test="RecordDate != null">
+					#{RecordDate},
+				</if>
+		</trim>
+	</insert>
+	
+	<!-- 保存 -->
+	<update id="updateByPrimaryKeySelective" parameterType="com.zehin.vpaas.beans.DECTreatmentRecordsContent">
+		UPDATE V_MZ_JZJL
+		<set>
+				<if test="Srno != null">
+					Srno = #{Srno},
+				</if>
+				<if test="RegNo != null">
+					RegNo = #{RegNo},
+				</if>
+				<if test="IDCard != null">
+					IDCard = #{IDCard},
+				</if>
+				<if test="HealthCard != null">
+					HealthCard = #{HealthCard},
+				</if>
+				<if test="PatientName != null">
+					PatientName = #{PatientName},
+				</if>
+				<if test="HospitalCode != null">
+					HospitalCode = #{HospitalCode},
+				</if>
+				<if test="HospitalName != null">
+					HospitalName = #{HospitalName},
+				</if>
+				<if test="HDiseaseCode != null">
+					HDiseaseCode = #{HDiseaseCode},
+				</if>
+				<if test="HDiseaseName != null">
+					HDiseaseName = #{HDiseaseName},
+				</if>
+				<if test="DiseaseCode != null">
+					DiseaseCode = #{DiseaseCode},
+				</if>
+				<if test="DiseaseName != null">
+					DiseaseName = #{DiseaseName},
+				</if>
+				<if test="ClinicDate != null">
+					ClinicDate = #{ClinicDate},
+				</if>
+				<if test="DoctorCode != null">
+					DoctorCode = #{DoctorCode},
+				</if>
+				<if test="DoctorName != null">
+					DoctorName = #{DoctorName},
+				</if>
+				<if test="HSecDiseaseCode != null">
+					HSecDiseaseCode = #{HSecDiseaseCode},
+				</if>
+				<if test="HSecDiseaseName != null">
+					HSecDiseaseName = #{HSecDiseaseName},
+				</if>
+				<if test="SecDiseaseCode != null">
+					SecDiseaseCode = #{SecDiseaseCode},
+				</if>
+				<if test="SecDiseaseName != null">
+					SecDiseaseName = #{SecDiseaseName},
+				</if>
+				<if test="Temperature != null">
+					Temperature = #{Temperature},
+				</if>
+				<if test="Weight != null">
+					Weight = #{Weight},
+				</if>
+				<if test="SBloodPressure != null">
+					SBloodPressure = #{SBloodPressure},
+				</if>
+				<if test="DBloodPressure != null">
+					DBloodPressure = #{DBloodPressure},
+				</if>
+				<if test="Pulse != null">
+					Pulse = #{Pulse},
+				</if>
+				<if test="CheckDate != null">
+					CheckDate = #{CheckDate},
+				</if>
+				<if test="CheckerCode != null">
+					CheckerCode = #{CheckerCode},
+				</if>
+				<if test="CheckerName != null">
+					CheckerName = #{CheckerName},
+				</if>
+				<if test="ClinicDesc != null">
+					ClinicDesc = #{ClinicDesc},
+				</if>
+				<if test="ClinicComplain != null">
+					ClinicComplain = #{ClinicComplain},
+				</if>
+				<if test="SymptomDesc != null">
+					SymptomDesc = #{SymptomDesc},
+				</if>
+				<if test="OperatorCode != null">
+					OperatorCode = #{OperatorCode},
+				</if>
+				<if test="OperatorName != null">
+					OperatorName = #{OperatorName},
+				</if>
+				<if test="SubmitDate != null">
+					SubmitDate = #{SubmitDate},
+				</if>
+				<if test="RecordDate != null">
+					RecordDate = #{RecordDate},
+				</if>
+	  			
+		</set>
+		WHERE 
+			Srno= #{Srno}
+	</update>
+	
+</mapper>

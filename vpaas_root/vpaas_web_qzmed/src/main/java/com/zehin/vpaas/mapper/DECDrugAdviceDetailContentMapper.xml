@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.zehin.vpaas.mapper.DECDrugAdviceDetailContentMapper">
+	
+	<resultMap id="rtmpDECDrugAdviceDetailContent" type="com.zehin.vpaas.beans.DECDrugAdviceDetailContent" >
+				<id column="Srno" property="Srno" />
+				<result column="AdviceSrno" property="AdviceSrno" />
+				<result column="AdviceCode" property="AdviceCode" />
+				<result column="RegNo" property="RegNo" />
+				<result column="IDCard" property="IDCard" />
+				<result column="HealthCard" property="HealthCard" />
+				<result column="PatientName" property="PatientName" />
+				<result column="HospitalCode" property="HospitalCode" />
+				<result column="HospitalName" property="HospitalName" />
+				<result column="PItemCode" property="PItemCode" />
+				
+				<result column="HItemCode" property="HItemCode" />
+				<result column="HItemName" property="HItemName" />
+				<result column="ItemCode" property="ItemCode" />
+				<result column="ItemName" property="ItemName" />
+				<result column="InputDate" property="InputDate" />
+				<result column="IsDrugs" property="IsDrugs" />
+				<result column="DosageCode" property="DosageCode" />
+				<result column="DosageName" property="DosageName" />
+				
+				<result column="DrugSpec" property="DrugSpec" />
+				<result column="QuantityNumber" property="QuantityNumber" />
+				<result column="DrugUnitCode" property="DrugUnitCode" />
+				<result column="DrugUnitName" property="DrugUnitName" />
+				<result column="BookFee" property="bookFee" />
+				<result column="Price" property="Price" />
+				<result column="TotalAmount" property="TotalAmount" />
+			<!-- 	<result column="Frequency" property="Frequency" />
+				<result column="DosageCount" property="DosageCount" />
+				<result column="DosageUnit" property="DosageUnit" />
+				 -->
+				<result column="Count" property="Count" />
+				<result column="CountUnit" property="CountUnit" />
+				<result column="BoilName" property="BoilName" />
+				<result column="SkinTestFlag" property="SkinTestFlag" />
+				<result column="SkinTestResult" property="SkinTestResult" />
+				<result column="SkinTestOperator" property="SkinTestOperator" />
+				<result column="SkinTestDate" property="SkinTestDate" />
+				<result column="OperatorCode" property="OperatorCode" />
+				<result column="OperatorName" property="OperatorName" />
+				<result column="SubmitDate" property="SubmitDate"  jdbcType="TIMESTAMP"/>
+				<result column="RecordState" property="RecordState" />
+			
+  	</resultMap>
+  	
+  	<sql id="Base_Column_List" >
+	  		AdviceSrno,
+			AdviceCode,
+			Srno,
+			RegNo,
+			IDCard,
+			
+			HealthCard,
+			PatientName,
+			HospitalCode,
+			HospitalName,
+			PItemCode,
+			
+			HItemCode,
+			HItemName,
+			ItemCode,
+			ItemName,
+			InputDate,
+			
+			IsDrugs,
+			DosageCode,
+			DosageName,
+			DrugSpec,
+			QuantityNumber,
+			
+			DrugUnitCode,
+			DrugUnitName,
+			Price,
+			TotalAmount,
+			Count,
+			CountUnit,
+			BoilName,
+			
+			SkinTestFlag,
+			SkinTestResult,
+			SkinTestOperator,
+			SkinTestDate,
+			OperatorCode,
+			
+			OperatorName,
+			SubmitDate,
+			RecordState
+
+ 	</sql>
+ 	
+ 	
+ 	<!-- 根据id查询 -->
+	<select id="selectByPrimaryKey" resultMap="rtmpDECDrugAdviceDetailContent">
+	    SELECT 
+	    <include refid="Base_Column_List" />
+	    FROM V_MZ_CFMX
+	    WHERE Srno = #{srno}
+ 	 </select>
+	
+	<!-- 查询所有 -->
+	<select id="findAll" resultMap="rtmpDECDrugAdviceDetailContent" 
+	    parameterType="com.zehin.vpaas.beans.DECDrugAdviceDetailContent">
+		select
+		<include refid="Base_Column_List" />
+		from V_MZ_CFMX
+	</select>
+	<select id="findByPage"  resultMap="rtmpDECDrugAdviceDetailContent" 
+	    parameterType="com.zehin.vpaas.beans.ViewAccessState">
+		select
+		<include refid="Base_Column_List" />
+		from V_MZ_CFMX where convert(varchar(19),SubmitDate,120) > #{SubmitDate} order by SubmitDate
+	</select>
+	<!-- 批量删除 -->
+	<delete id="deleteBT" parameterType="java.lang.String">
+		DELETE FROM
+		V_MZ_CFMX
+		WHERE 
+			Srno
+		IN
+		<foreach item="idItem" collection="array" open="(" separator="," close=")">
+			'${idItem}'
+		</foreach>
+	</delete>
+	
+	<!-- 选择性插入数据 -->
+	<insert id="insertSelective" parameterType="com.zehin.vpaas.beans.DECDrugAdviceDetailContent">
+		INSERT INTO V_MZ_CFMX
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="Srno != null">
+					Srno,
+				</if>
+				<if test="AdviceSrno != null">
+					AdviceSrno,
+				</if>
+				<if test="AdviceCode != null">
+					AdviceCode,
+				</if>
+				<if test="RegNo != null">
+					RegNo,
+				</if>
+				<if test="IDCard != null">
+					IDCard,
+				</if>
+				<if test="HealthCard != null">
+					HealthCard,
+				</if>
+				<if test="PatientName != null">
+					PatientName,
+				</if>
+				<if test="HospitalCode != null">
+					HospitalCode,
+				</if>
+				<if test="HospitalName != null">
+					HospitalName,
+				</if>
+				<if test="PItemCode != null">
+					PItemCode,
+				</if>
+				<if test="HItemCode != null">
+					HItemCode,
+				</if>
+				<if test="HItemName != null">
+					HItemName,
+				</if>
+				<if test="ItemCode != null">
+					ItemCode,
+				</if>
+				<if test="ItemName != null">
+					ItemName,
+				</if>
+				<if test="InputDate != null">
+					InputDate,
+				</if>
+				<if test="IsDrugs != null">
+					IsDrugs,
+				</if>
+				<if test="DosageCode != null">
+					DosageCode,
+				</if>
+				<if test="DosageName != null">
+					DosageName,
+				</if>
+				<if test="DrugSpec != null">
+					DrugSpec,
+				</if>
+				<if test="QuantityNumber != null">
+					QuantityNumber,
+				</if>
+				<if test="DrugUnitCode != null">
+					DrugUnitCode,
+				</if>
+				<if test="DrugUnitName != null">
+					DrugUnitName,
+				</if>
+				<if test="BookFee != null">
+					BookFee,
+				</if>
+				<if test="Price != null">
+					Price,
+				</if>
+				<if test="TotalAmount != null">
+					TotalAmount,
+				</if>
+				
+				<if test="Count != null">
+					Count,
+				</if>
+				<if test="CountUnit != null">
+					CountUnit,
+				</if>
+				<if test="BoilName != null">
+					BoilName,
+				</if>
+				<if test="SkinTestFlag != null">
+					SkinTestFlag,
+				</if>
+				<if test="SkinTestResult != null">
+					SkinTestResult,
+				</if>
+				<if test="SkinTestOperator != null">
+					SkinTestOperator,
+				</if>
+				<if test="SkinTestDate != null">
+					SkinTestDate,
+				</if>
+				<if test="OperatorCode != null">
+					OperatorCode,
+				</if>
+				<if test="OperatorName != null">
+					OperatorName,
+				</if>
+				<if test="SubmitDate != null">
+					SubmitDate,
+				</if>
+				<if test="RecordState != null">
+					RecordState,
+				</if>
+		  		
+		</trim>
+		<trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+				<if test="Srno != null">
+					#{Srno},
+				</if>
+				<if test="AdviceSrno != null">
+					#{AdviceSrno},
+				</if>
+				<if test="AdviceCode != null">
+					#{AdviceCode},
+				</if>
+				<if test="RegNo != null">
+					#{RegNo},
+				</if>
+				<if test="IDCard != null">
+					#{IDCard},
+				</if>
+				<if test="HealthCard != null">
+					#{HealthCard},
+				</if>
+				<if test="PatientName != null">
+					#{PatientName},
+				</if>
+				<if test="HospitalCode != null">
+					#{HospitalCode},
+				</if>
+				<if test="HospitalName != null">
+					#{HospitalName},
+				</if>
+				<if test="PItemCode != null">
+					#{PItemCode},
+				</if>
+				<if test="HItemCode != null">
+					#{HItemCode},
+				</if>
+				<if test="HItemName != null">
+					#{HItemName},
+				</if>
+				<if test="ItemCode != null">
+					#{ItemCode},
+				</if>
+				<if test="ItemName != null">
+					#{ItemName},
+				</if>
+				<if test="InputDate != null">
+					#{InputDate},
+				</if>
+				<if test="IsDrugs != null">
+					#{IsDrugs},
+				</if>
+				<if test="DosageCode != null">
+					#{DosageCode},
+				</if>
+				<if test="DosageName != null">
+					#{DosageName},
+				</if>
+				<if test="DrugSpec != null">
+					#{DrugSpec},
+				</if>
+				<if test="QuantityNumber != null">
+					#{QuantityNumber},
+				</if>
+				<if test="DrugUnitCode != null">
+					#{DrugUnitCode},
+				</if>
+				<if test="DrugUnitName != null">
+					#{DrugUnitName},
+				</if>
+				<if test="BookFee != null">
+					#{BookFee},
+				</if>
+				<if test="Price != null">
+					#{Price},
+				</if>
+				<if test="TotalAmount != null">
+					#{TotalAmount},
+				</if>
+				
+				<if test="Count != null">
+					#{Count},
+				</if>
+				<if test="CountUnit != null">
+					#{CountUnit},
+				</if>
+				<if test="BoilName != null">
+					#{BoilName},
+				</if>
+	  			<if test="SkinTestFlag != null">
+					#{SkinTestFlag},
+				</if>
+				<if test="SkinTestResult != null">
+					#{SkinTestResult},
+				</if>
+				<if test="SkinTestOperator != null">
+					#{SkinTestOperator},
+				</if>
+				<if test="SkinTestDate != null">
+					#{SkinTestDate},
+				</if>
+				<if test="OperatorCode != null">
+					#{OperatorCode},
+				</if>
+				<if test="OperatorName != null">
+					#{OperatorName},
+				</if>
+				<if test="SubmitDate != null">
+					#{SubmitDate},
+				</if>
+				<if test="RecordState != null">
+					#{RecordState},
+				</if>
+		</trim>
+	</insert>
+	
+	<!-- 保存 -->
+	<update id="updateByPrimaryKeySelective" parameterType="com.zehin.vpaas.beans.DECDrugAdviceDetailContent">
+		UPDATE V_MZ_CFMX
+		<set>
+				<if test="Srno != null">
+					Srno = #{Srno},
+				</if>
+				<if test="AdviceSrno != null">
+					AdviceSrno = #{AdviceSrno},
+				</if>
+				<if test="AdviceCode != null">
+					AdviceCode = #{AdviceCode},
+				</if>
+				<if test="RegNo != null">
+					RegNo = #{RegNo},
+				</if>
+				<if test="IDCard != null">
+					IDCard = #{IDCard},
+				</if>
+				<if test="HealthCard != null">
+					HealthCard = #{HealthCard},
+				</if>
+				<if test="PatientName != null">
+					PatientName = #{PatientName},
+				</if>
+				<if test="HospitalCode != null">
+					HospitalCode = #{HospitalCode},
+				</if>
+				<if test="HospitalName != null">
+					HospitalName = #{HospitalName},
+				</if>
+				<if test="PItemCode != null">
+					PItemCode = #{PItemCode},
+				</if>
+				<if test="HItemCode != null">
+					HItemCode = #{HItemCode},
+				</if>
+				<if test="HItemName != null">
+					HItemName = #{HItemName},
+				</if>
+				<if test="ItemCode != null">
+					ItemCode = #{ItemCode},
+				</if>
+				<if test="ItemName != null">
+					ItemName = #{ItemName},
+				</if>
+				<if test="InputDate != null">
+					InputDate = #{InputDate},
+				</if>
+				<if test="IsDrugs != null">
+					IsDrugs = #{IsDrugs},
+				</if>
+				<if test="DosageCode != null">
+					DosageCode = #{DosageCode},
+				</if>
+				<if test="DosageName != null">
+					DosageName = #{DosageName},
+				</if>
+				<if test="DrugSpec != null">
+					DrugSpec = #{DrugSpec},
+				</if>
+				<if test="QuantityNumber != null">
+					QuantityNumber = #{QuantityNumber},
+				</if>
+				<if test="DrugUnitCode != null">
+					DrugUnitCode = #{DrugUnitCode},
+				</if>
+				<if test="DrugUnitName != null">
+					DrugUnitName = #{DrugUnitName},
+				</if>
+				<if test="BookFee != null">
+					BookFee = #{BookFee},
+				</if>
+				<if test="Price != null">
+					Price = #{Price},
+				</if>
+				<if test="TotalAmount != null">
+					TotalAmount = #{TotalAmount},
+				</if>
+				
+				<if test="Count != null">
+					Count = #{Count},
+				</if>
+				<if test="CountUnit != null">
+					CountUnit = #{CountUnit},
+				</if>
+				<if test="BoilName != null">
+					BoilName = #{BoilName},
+				</if>
+	  			<if test="SkinTestFlag != null">
+					SkinTestFlag = #{SkinTestFlag},
+				</if>
+				<if test="SkinTestResult != null">
+					SkinTestResult = #{SkinTestResult},
+				</if>
+				<if test="SkinTestOperator != null">
+					SkinTestOperator = #{SkinTestOperator},
+				</if>
+				<if test="SkinTestDate != null">
+					SkinTestDate = #{SkinTestDate},
+				</if>
+				<if test="OperatorCode != null">
+					OperatorCode = #{OperatorCode},
+				</if>
+				<if test="OperatorName != null">
+					OperatorName = #{OperatorName},
+				</if>
+				<if test="SubmitDate != null">
+					SubmitDate = #{SubmitDate},
+				</if>
+				<if test="RecordState != null">
+					RecordState = #{RecordState},
+				</if>
+		</set>
+		WHERE 
+			Srno= #{Srno}
+	</update>
+	
+</mapper>

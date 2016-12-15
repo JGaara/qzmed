@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.zehin.vpaas.mapper.ViewAccessStateMapper">
+	
+	<resultMap id="rtmpViewAccessState" type="com.zehin.vpaas.beans.ViewAccessState" >
+				<result column="ViewName" property="ViewName" jdbcType="TIMESTAMP"/>
+				<result column="AccessDate" property="AccessDate"/>
+				<result column="IsLast" property="IsLast" />
+				<result column="SubmitDate" property="SubmitDate" jdbcType="TIMESTAMP"/>
+  	</resultMap>
+  	
+  	<sql id="Base_Column_List" >
+  			ViewName,
+  			AccessDate,
+  			IsLast,
+  			SubmitDate
+ 	</sql>
+ 	
+ 	
+ 	<!-- 查询所有最近访问时间 -->
+	<select id="getLastAccessTimes" resultMap="rtmpViewAccessState">
+	    SELECT 
+	    <include refid="Base_Column_List" />
+	    FROM VIEWACCESSSTATE
+	    WHERE ISLAST = '1'
+ 	 </select>
+	
+	<!-- 添加访问日期 -->
+	<select id="addAccessTime" 
+	    parameterType="com.zehin.vpaas.beans.ViewAccessState">
+		INSERT INTO VIEWACCESSSTATE
+		(ViewName, AccessDate, IsLast, SubmitDate) values (#{ViewName}, #{AccessDate}, #{IsLast}, #{SubmitDate})
+	</select>
+	
+	<!-- 更新访问时间，过期 -->
+	<select id="outDate"
+	    parameterType="com.zehin.vpaas.beans.ViewAccessState">
+		UPDATE VIEWACCESSSTATE SET IsLast = '0' WHERE ViewName = #{ViewName} AND IsLast = '1'
+	</select>
+	
+	<!-- 根据视图名，查询最近访问时间 -->
+	<select id="getLastByView" parameterType="com.zehin.vpaas.beans.ViewAccessState"
+				 resultType="com.zehin.vpaas.beans.ViewAccessState">
+		SELECT 
+	    <include refid="Base_Column_List" />
+	    FROM VIEWACCESSSTATE
+	    WHERE ISLAST = '1' AND ViewName = #{ViewName}
+	</select>
+</mapper>

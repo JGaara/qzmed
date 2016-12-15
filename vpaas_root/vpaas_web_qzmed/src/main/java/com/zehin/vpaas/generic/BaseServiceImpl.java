@@ -4,6 +4,9 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.github.pagehelper.Page;
+import com.zehin.vpaas.beans.ViewAccessState;
+
 /**
  * 
  * @ClassName: BaseServiceImpl
@@ -72,7 +75,12 @@ public abstract class BaseServiceImpl<T extends BaseDao<Model, PK>, Model, PK> i
 	 * 全部查询
 	 */
 	public List<Model> findAll(Model model) {
-		List<Model> voList = getDao().findByPage(model);
+		List<Model> voList = getDao().findAll(model);
 		return voList;
+	}
+	
+	public List<Model> findByPage(ViewAccessState state) {
+		List<Model> pageList = getDao().findByPage(state);
+		return pageList;
 	}
 }

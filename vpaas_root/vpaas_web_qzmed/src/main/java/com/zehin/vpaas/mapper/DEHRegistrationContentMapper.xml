@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.zehin.vpaas.mapper.DEHRegistrationContentMapper">
+	
+	<resultMap id="rtmpDEHRegistrationContent" type="com.zehin.vpaas.beans.DEHRegistrationContent" >
+				<id column="Srno" property="Srno" />
+				<result column="HospitalNO" property="HospitalNO" />
+				<result column="IDCard" property="IDCard" />
+				<result column="HealthCard" property="healthCard" />
+				<result column="PatientName" property="patientName" />
+				<result column="HospitalCode" property="hospitalCode" />
+				<result column="HospitalName" property="HospitalName" />
+				<result column="InDate" property="InDate" />
+				<result column="OutDate" property="OutDate" />
+				<result column="InDeptCode" property="InDeptCode" />
+				<result column="InDeptName" property="InDeptName" />
+				<result column="BedNO" property="BedNO" />
+				<result column="HInDiseaaseCode" property="HInDiseaaseCode" />
+				<result column="HInDiseaaseName" property="HInDiseaaseName" />
+				<result column="InDiseaaseCode" property="InDiseaaseCode" />
+				<result column="InDiseaaseName" property="InDiseaaseName" />
+				<result column="InSymptomCode" property="InSymptomCode" />
+				<result column="InSymptomName" property="InSymptomName" />
+				<result column="GenderCode" property="GenderCode" />
+				<result column="GenderName" property="GenderName" />
+				<result column="Birthday" property="Birthday" />
+				<result column="DoctorCode" property="DoctorCode" />
+				<result column="DoctorName" property="DoctorName" />
+				<result column="NurseCode" property="NurseCode" />
+				<result column="NurseName" property="NurseName" />
+				<result column="OperatorCode" property="OperatorCode" />
+				<result column="OperatorName" property="OperatorName" />
+				<result column="SubmitDate" property="SubmitDate"  jdbcType="TIMESTAMP"
+				/>
+				<result column="RecordState" property="RecordState" />
+				<result column="ContactPhone" property="ContactPhone" />
+				<result column="ContactAddress" property="ContactAddress" />
+				<result column="WayInCode" property="WayInCode" />
+				<result column="WayInName" property="WayInName" />
+  	</resultMap>
+  	
+  	<sql id="Base_Column_List" >
+	  		Srno,
+			HospitalNo,
+			IDCard,
+			HealthCard,
+			PatientName,
+			
+			HospitalCode,
+			HospitalName,
+			InDate,
+			OutDate,
+			InDeptCode,
+			
+			InDeptName,
+			BedNO,
+			HInDiseaaseCode,
+			HInDiseaaseName,
+			InDiseaaseCode,
+			
+			InDiseaaseName,
+			InSymptomCode,
+			InSymptomName,
+			GenderCode,
+			GenderName,
+			
+			Birthday,
+			DoctorCode,
+			DoctorName,
+			NurseCode,
+			NurseName,
+			
+			OperatorCode,
+			OperatorName,
+			SubmitDate,
+			RecordState,
+			ContactPhone,
+			
+			ContactAddress,
+			WayInCode,
+			WayInName
+	  	
+ 	</sql>
+ 	
+ 	
+ 	<!-- 根据id查询 -->
+	<select id="selectByPrimaryKey" resultMap="rtmpDEHRegistrationContent">
+	    SELECT 
+	    <include refid="Base_Column_List" />
+	    FROM V_ZY_ZYDJ
+	    WHERE Srno = #{srno}
+ 	 </select>
+	
+	<!-- 查询所有 -->
+	<select id="findAll" resultMap="rtmpDEHRegistrationContent" 
+	    parameterType="com.zehin.vpaas.beans.DEHRegistrationContent">
+		select
+		<include refid="Base_Column_List" />
+		from V_ZY_ZYDJ
+	</select>
+	<select id="findByPage" resultMap="rtmpDEHRegistrationContent" 
+	    parameterType="com.zehin.vpaas.beans.ViewAccessState">
+		select
+		<include refid="Base_Column_List" />
+		from V_ZY_ZYDJ where convert(varchar(19),SubmitDate,120) > #{SubmitDate} order by SubmitDate
+
+	</select>
+	<!-- 批量删除 -->
+	<delete id="deleteBT" parameterType="java.lang.String">
+		DELETE FROM
+		V_ZY_ZYDJ
+		WHERE 
+			Srno
+		IN
+		<foreach item="idItem" collection="array" open="(" separator="," close=")">
+			'${idItem}'
+		</foreach>
+	</delete>
+	
+	<!-- 选择性插入数据 -->
+	<insert id="insertSelective" parameterType="com.zehin.vpaas.beans.DEHRegistrationContent">
+		INSERT INTO V_ZY_ZYDJ
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="Srno != null">
+					Srno,
+				</if>
+				<if test="HospitalNO != null">
+					HospitalNO,
+				</if>
+				<if test="IDCard != null">
+					IDCard,
+				</if>
+				<if test="HealthCard != null">
+					HealthCard,
+				</if>
+				<if test="PatientName != null">
+					PatientName,
+				</if>
+				<if test="HospitalCode != null">
+					HospitalCode,
+				</if>
+				<if test="HospitalName != null">
+					HospitalName,
+				</if>
+				<if test="InDate != null">
+					InDate,
+				</if>
+				<if test="OutDate != null">
+					OutDate,
+				</if>
+				<if test="InDeptCode != null">
+					InDeptCode,
+				</if>
+				<if test="InDeptName != null">
+					InDeptName,
+				</if>
+				<if test="BedNO != null">
+					BedNO,
+				</if>
+				<if test="HInDiseaaseCode != null">
+					HInDiseaaseCode,
+				</if>
+				<if test="HInDiseaaseName != null">
+					HInDiseaaseName,
+				</if>
+				<if test="InDiseaaseCode != null">
+					InDiseaaseCode,
+				</if>
+				<if test="InDiseaaseName != null">
+					InDiseaaseName,
+				</if>
+				<if test="InSymptomCode != null">
+					InSymptomCode,
+				</if>
+				<if test="InSymptomName != null">
+					InSymptomName,
+				</if>
+				<if test="GenderCode != null">
+					GenderCode,
+				</if>
+				<if test="GenderName != null">
+					GenderName,
+				</if>
+				<if test="Birthday != null">
+					Birthday,
+				</if>
+				<if test="DoctorCode != null">
+					DoctorCode,
+				</if>
+				<if test="DoctorName != null">
+					DoctorName,
+				</if>
+				<if test="NurseCode != null">
+					NurseCode,
+				</if>
+				<if test="NurseName != null">
+					NurseName,
+				</if>
+				<if test="OperatorCode != null">
+					OperatorCode,
+				</if>
+				<if test="OperatorName != null">
+					OperatorName,
+				</if>
+				<if test="SubmitDate != null">
+					SubmitDate,
+				</if>
+				<if test="RecordState != null">
+					RecordState,
+				</if>
+				<if test="ContactPhone != null">
+					ContactPhone,
+				</if>
+				<if test="ContactAddress != null">
+					ContactAddress,
+				</if>
+				<if test="WayInCode != null">
+					WayInCode,
+				</if>
+				<if test="WayInName != null">
+					WayInName,
+				</if>
+		  		
+		</trim>
+		<trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+				<if test="Srno != null">
+					#{Srno},
+				</if>
+				<if test="HospitalNO != null">
+					#{HospitalNO},
+				</if>
+				<if test="IDCard != null">
+					#{IDCard},
+				</if>
+				<if test="HealthCard != null">
+					#{HealthCard},
+				</if>
+				<if test="PatientName != null">
+					#{PatientName},
+				</if>
+				<if test="HospitalCode != null">
+					#{HospitalCode},
+				</if>
+				<if test="HospitalName != null">
+					#{HospitalName},
+				</if>
+				<if test="InDate != null">
+					#{InDate},
+				</if>
+				<if test="OutDate != null">
+					#{OutDate},
+				</if>
+				<if test="InDeptCode != null">
+					#{InDeptCode},
+				</if>
+				<if test="InDeptName != null">
+					#{InDeptName},
+				</if>
+				<if test="BedNO != null">
+					#{BedNO},
+				</if>
+				<if test="HInDiseaaseCode != null">
+					#{HInDiseaaseCode},
+				</if>
+				<if test="HInDiseaaseName != null">
+					#{HInDiseaaseName},
+				</if>
+				<if test="InDiseaaseCode != null">
+					#{InDiseaaseCode},
+				</if>
+				<if test="InDiseaaseName != null">
+					#{InDiseaaseName},
+				</if>
+				<if test="InSymptomCode != null">
+					#{InSymptomCode},
+				</if>
+				<if test="InSymptomName != null">
+					#{InSymptomName},
+				</if>
+				<if test="GenderCode != null">
+					#{GenderCode},
+				</if>
+				<if test="GenderName != null">
+					#{GenderName},
+				</if>
+				<if test="Birthday != null">
+					#{Birthday},
+				</if>
+				<if test="DoctorCode != null">
+					#{DoctorCode},
+				</if>
+				<if test="DoctorName != null">
+					#{DoctorName},
+				</if>
+				<if test="NurseCode != null">
+					#{NurseCode},
+				</if>
+				<if test="NurseName != null">
+					#{NurseName},
+				</if>
+				<if test="OperatorCode != null">
+					#{OperatorCode},
+				</if>
+				<if test="OperatorName != null">
+					#{OperatorName},
+				</if>
+				<if test="SubmitDate != null">
+					#{SubmitDate},
+				</if>
+				<if test="RecordState != null">
+					#{RecordState},
+				</if>
+				<if test="ContactPhone != null">
+					#{ContactPhone},
+				</if>
+				<if test="ContactAddress != null">
+					#{ContactAddress},
+				</if>
+				<if test="WayInCode != null">
+					#{WayInCode},
+				</if>
+				<if test="WayInName != null">
+					#{WayInName},
+				</if>
+	  		
+		</trim>
+	</insert>
+	
+	<!-- 保存 -->
+	<update id="updateByPrimaryKeySelective" parameterType="com.zehin.vpaas.beans.DEHRegistrationContent">
+		UPDATE V_ZY_ZYDJ
+		<set>
+				<if test="Srno != null">
+					Srno=#{Srno},
+				</if>
+				<if test="HospitalNO != null">
+					HospitalNO=#{HospitalNO},
+				</if>
+				<if test="IDCard != null">
+					IDCard=#{IDCard},
+				</if>
+				<if test="HealthCard != null">
+					HealthCard=#{HealthCard},
+				</if>
+				<if test="PatientName != null">
+					PatientName=#{PatientName},
+				</if>
+				<if test="HospitalCode != null">
+					HospitalCode=#{HospitalCode},
+				</if>
+				<if test="HospitalName != null">
+					HospitalName=#{HospitalName},
+				</if>
+				<if test="InDate != null">
+					InDate=#{InDate},
+				</if>
+				<if test="OutDate != null">
+					OutDate=#{OutDate},
+				</if>
+				<if test="InDeptCode != null">
+					InDeptCode=#{InDeptCode},
+				</if>
+				<if test="InDeptName != null">
+					InDeptName=#{InDeptName},
+				</if>
+				<if test="BedNO != null">
+					BedNO=#{BedNO},
+				</if>
+				<if test="HInDiseaaseCode != null">
+					HInDiseaaseCode=#{HInDiseaaseCode},
+				</if>
+				<if test="HInDiseaaseName != null">
+					HInDiseaaseName=#{HInDiseaaseName},
+				</if>
+				<if test="InDiseaaseCode != null">
+					InDiseaaseCode=#{InDiseaaseCode},
+				</if>
+				<if test="InDiseaaseName != null">
+					InDiseaaseName=#{InDiseaaseName},
+				</if>
+				<if test="InSymptomCode != null">
+					InSymptomCode=#{InSymptomCode},
+				</if>
+				<if test="InSymptomName != null">
+					InSymptomName=#{InSymptomName},
+				</if>
+				<if test="GenderCode != null">
+					GenderCode=#{GenderCode},
+				</if>
+				<if test="GenderName != null">
+					GenderName=#{GenderName},
+				</if>
+				<if test="Birthday != null">
+					Birthday=#{Birthday},
+				</if>
+				<if test="DoctorCode != null">
+					DoctorCode=#{DoctorCode},
+				</if>
+				<if test="DoctorName != null">
+					DoctorName=#{DoctorName},
+				</if>
+				<if test="NurseCode != null">
+					NurseCode=#{NurseCode},
+				</if>
+				<if test="NurseName != null">
+					NurseName=#{NurseName},
+				</if>
+				<if test="OperatorCode != null">
+					OperatorCode=#{OperatorCode},
+				</if>
+				<if test="OperatorName != null">
+					OperatorName=#{OperatorName},
+				</if>
+				<if test="SubmitDate != null">
+					SubmitDate=#{SubmitDate},
+				</if>
+				<if test="RecordState != null">
+					RecordState=#{RecordState},
+				</if>
+				<if test="ContactPhone != null">
+					ContactPhone=#{ContactPhone},
+				</if>
+				<if test="ContactAddress != null">
+					ContactAddress=#{ContactAddress},
+				</if>
+				<if test="WayInCode != null">
+					WayInCode=#{WayInCode},
+				</if>
+				<if test="WayInName != null">
+					WayInName=#{WayInName},
+				</if>
+	  			
+		</set>
+		WHERE 
+			Srno= #{srno}
+	</update>
+	
+</mapper>

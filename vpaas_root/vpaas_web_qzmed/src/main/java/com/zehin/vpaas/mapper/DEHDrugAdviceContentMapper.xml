@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.zehin.vpaas.mapper.DEHDrugAdviceContentMapper">
+	
+	<resultMap id="rtmpDEHDrugAdviceContent" type="com.zehin.vpaas.beans.DEHDrugAdviceContent" >
+				<id column="AdviceCode" property="AdviceCode" />
+				<result column="Srno" property="Srno" />
+				<result column="HospitalNO" property="HospitalNO" />
+				<result column="IDCard" property="IDCard" />
+				<result column="HealthCard" property="healthCard" />
+				<result column="PatientName" property="patientName" />
+				<result column="HospitalCode" property="hospitalCode" />
+				<result column="HospitalName" property="hospitalName" />
+				<result column="AdviceName" property="AdviceName" />
+				<result column="InputDate" property="InputDate" />
+				<result column="InputEmpCode" property="InputEmpCode" />
+				<result column="InputEmpName" property="InputEmpName" />
+				<result column="ReviewerCode" property="ReviewerCode" />
+				<result column="ReviewerName" property="ReviewerName" />
+				<result column="OpenDeptCode" property="OpenDeptCode" />
+				<result column="OpenDeptName" property="OpenDeptName" />
+				<result column="ExeDeptCode" property="ExeDeptCode" />
+				<result column="ExeDeptName" property="ExeDeptName" />
+				<result column="StartDate" property="StartDate" />
+				<result column="ExecDoctorCode" property="ExecDoctorCode" />
+				<result column="ExecDoctorName" property="ExecDoctorName" />
+				<result column="StopcDoctorCode" property="StopcDoctorCode" />
+				<result column="StopcDoctorName" property="StopcDoctorName" />
+				<result column="StopDate" property="StopDate" />
+				<result column="TotalAmount" property="TotalAmount" />
+				<result column="OperatorCode" property="operatorCode" />
+				<result column="OperatorName" property="operatorName" />
+				<result column="SubmitDate" property="submitDate"  jdbcType="TIMESTAMP"
+				/>
+				<result column="RecordState" property="recordState" />
+			
+  	</resultMap>
+  	
+  	<sql id="Base_Column_List" >
+	  		AdviceCode,
+			Srno,
+			HospitalNO,
+			IDCard,
+			HealthCard,
+			
+			PatientName,
+			HospitalCode,
+			HospitalName,
+			AdviceName,
+			InputDate,
+			
+			InputEmpCode,
+			InputEmpName,
+			ReviewerCode,
+			ReviewerName,	
+			OpenDeptCode,
+			
+			OpenDeptName,
+			ExeDeptCode,
+			ExeDeptName,
+			StartDate,
+			ExecDoctorCode,
+			
+			ExecDoctorName,
+			StopcDoctorCode,
+			StopcDoctorName,
+			StopDate,
+			TotalAmount,
+			
+		
+			OperatorCode,
+			OperatorName,
+			SubmitDate,
+			RecordState
+	  	
+ 	</sql>
+ 	
+ 	
+ 	<!-- 根据id查询 -->
+	<select id="selectByPrimaryKey" resultMap="rtmpDEHDrugAdviceContent">
+	    SELECT 
+	    <include refid="Base_Column_List" />
+	    FROM V_ZY_YZJK
+	    WHERE Srno = #{srno}
+ 	 </select>
+	
+	<!-- 查询所有 -->
+	<select id="findAll" resultMap="rtmpDEHDrugAdviceContent" 
+	    parameterType="com.zehin.vpaas.beans.DEHDrugAdviceContent">
+		select
+		<include refid="Base_Column_List" />
+		from V_ZY_YZJK
+	</select>
+	<select id="findByPage" resultMap="rtmpDEHDrugAdviceContent" 
+	    parameterType="com.zehin.vpaas.beans.ViewAccessState">
+		select
+		<include refid="Base_Column_List" />
+		from V_ZY_YZJK where convert(varchar(19),SubmitDate,120) > #{SubmitDate} order by SubmitDate
+	</select>
+	<!-- 批量删除 -->
+	<delete id="deleteBT" parameterType="java.lang.String">
+		DELETE FROM
+		V_ZY_YZJK
+		WHERE 
+			Srno
+		IN
+		<foreach item="idItem" collection="array" open="(" separator="," close=")">
+			'${idItem}'
+		</foreach>
+	</delete>
+	
+	<!-- 选择性插入数据 -->
+	<insert id="insertSelective" parameterType="com.zehin.vpaas.beans.DEHDrugAdviceContent">
+		INSERT INTO V_ZY_YZJK
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="AdviceCode != null">
+					AdviceCode,
+				</if>
+				<if test="Srno != null">
+					Srno,
+				</if>
+				<if test="HospitalNO != null">
+					HospitalNO,
+				</if>
+				<if test="IDCard != null">
+					IDCard,
+				</if>
+				<if test="HealthCard != null">
+					HealthCard,
+				</if>
+				<if test="PatientName != null">
+					PatientName,
+				</if>
+				<if test="HospitalCode != null">
+					HospitalCode,
+				</if>
+				<if test="HospitalName != null">
+					HospitalName,
+				</if>
+				<if test="AdviceName != null">
+					AdviceName,
+				</if>
+				<if test="InputDate != null">
+					InputDate,
+				</if>
+				<if test="InputEmpCode != null">
+					InputEmpCode,
+				</if>
+				<if test="InputEmpCode != null">
+					InputEmpCode,
+				</if>
+				<if test="InputEmpName != null">
+					InputEmpName,
+				</if>
+				<if test="ReviewerCode != null">
+					ReviewerCode,
+				</if>
+				<if test="ReviewerName != null">
+					ReviewerName,
+				</if>
+				<if test="OpenDeptCode != null">
+					OpenDeptCode,
+				</if>
+				<if test="OpenDeptName != null">
+					OpenDeptName,
+				</if>
+				<if test="ExeDeptCode != null">
+					ExeDeptCode,
+				</if>
+				<if test="ExeDeptName != null">
+					ExeDeptName,
+				</if>
+				<if test="StartDate != null">
+					StartDate,
+				</if>
+				<if test="ExecDoctorCode != null">
+					ExecDoctorCode,
+				</if>
+				<if test="ExecDoctorName != null">
+					ExecDoctorName,
+				</if>
+				<if test="StopcDoctorCode != null">
+					StopcDoctorCode,
+				</if>
+				<if test="StopcDoctorName != null">
+					StopcDoctorName,
+				</if>
+				<if test="StopDate != null">
+					StopDate,
+				</if>
+				<if test="TotalAmount != null">
+					TotalAmount,
+				</if>
+				<if test="OperatorCode != null">
+					OperatorCode,
+				</if>
+				<if test="OperatorName != null">
+					OperatorName,
+				</if>
+				<if test="SubmitDate != null">
+					SubmitDate,
+				</if>
+				<if test="RecordState != null">
+					RecordState,
+				</if>
+		  		
+		</trim>
+		<trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+				<if test="AdviceCode != null">
+					#{AdviceCode},
+				</if>
+				<if test="Srno != null">
+					#{Srno},
+				</if>
+				<if test="HospitalNO != null">
+					#{HospitalNO},
+				</if>
+				<if test="IDCard != null">
+					#{IDCard},
+				</if>
+				<if test="HealthCard != null">
+					#{HealthCard},
+				</if>
+				<if test="PatientName != null">
+					#{PatientName},
+				</if>
+				<if test="HospitalCode != null">
+					HospitalCode},
+				</if>
+				<if test="HospitalName != null">
+					#{HospitalName},
+				</if>
+				<if test="AdviceName != null">
+					#{AdviceName},
+				</if>
+				<if test="InputDate != null">
+					#{InputDate},
+				</if>
+				<if test="InputEmpCode != null">
+					#{InputEmpCode},
+				</if>
+				<if test="InputEmpCode != null">
+					#{InputEmpCode},
+				</if>
+				<if test="InputEmpName != null">
+					#{InputEmpName},
+				</if>
+				<if test="ReviewerCode != null">
+					#{ReviewerCode},
+				</if>
+				<if test="ReviewerName != null">
+					#{ReviewerName},
+				</if>
+				<if test="OpenDeptCode != null">
+					#{OpenDeptCode},
+				</if>
+				<if test="OpenDeptName != null">
+					#{OpenDeptName},
+				</if>
+				<if test="ExeDeptCode != null">
+					#{ExeDeptCode},
+				</if>
+				<if test="ExeDeptName != null">
+					#{ExeDeptName},
+				</if>
+				<if test="StartDate != null">
+					#{StartDate},
+				</if>
+				<if test="ExecDoctorCode != null">
+					#{ExecDoctorCode},
+				</if>
+				<if test="ExecDoctorName != null">
+					#{ExecDoctorName},
+				</if>
+				<if test="StopcDoctorCode != null">
+					#{StopcDoctorCode},
+				</if>
+				<if test="StopcDoctorName != null">
+					#{StopcDoctorName},
+				</if>
+				<if test="StopDate != null">
+					#{StopDate},
+				</if>
+				<if test="TotalAmount != null">
+					#{TotalAmount},
+				</if>
+				<if test="OperatorCode != null">
+					#{OperatorCode},
+				</if>
+				<if test="OperatorName != null">
+					#{OperatorName},
+				</if>
+				<if test="SubmitDate != null">
+					#{SubmitDate},
+				</if>
+				<if test="RecordState != null">
+					#{RecordState},
+				</if>
+	  		
+		</trim>
+	</insert>
+	
+	<!-- 保存 -->
+	<update id="updateByPrimaryKeySelective" parameterType="com.zehin.vpaas.beans.DEHDrugAdviceContent">
+		UPDATE V_ZY_YZJK
+		<set>
+				<if test="AdviceCode != null">
+					AdviceCode=#{AdviceCode},
+				</if>
+				<if test="Srno != null">
+					Srno=#{Srno},
+				</if>
+				<if test="HospitalNO != null">
+					HospitalNO=#{HospitalNO},
+				</if>
+				<if test="IDCard != null">
+					IDCard=#{IDCard},
+				</if>
+				<if test="HealthCard != null">
+					HealthCard=#{HealthCard},
+				</if>
+				<if test="PatientName != null">
+					PatientName=#{PatientName},
+				</if>
+				<if test="HospitalCode != null">
+					HospitalCode=#{HospitalCode},
+				</if>
+				<if test="HospitalName != null">
+					HospitalName=#{HospitalName},
+				</if>
+				<if test="AdviceName != null">
+					AdviceName=#{AdviceName},
+				</if>
+				<if test="InputDate != null">
+					InputDate=#{InputDate},
+				</if>
+				<if test="InputEmpCode != null">
+					InputEmpCode=#{InputEmpCode},
+				</if>
+				<if test="InputEmpCode != null">
+					InputEmpCode=#{InputEmpCode},
+				</if>
+				<if test="InputEmpName != null">
+					InputEmpName=#{InputEmpName},
+				</if>
+				<if test="ReviewerCode != null">
+					ReviewerCode=#{ReviewerCode},
+				</if>
+				<if test="ReviewerName != null">
+					ReviewerName=#{ReviewerName},
+				</if>
+				<if test="OpenDeptCode != null">
+					OpenDeptCode=#{OpenDeptCode},
+				</if>
+				<if test="OpenDeptName != null">
+					OpenDeptName=#{OpenDeptName},
+				</if>
+				<if test="ExeDeptCode != null">
+					ExeDeptCode=#{ExeDeptCode},
+				</if>
+				<if test="ExeDeptName != null">
+					ExeDeptName=#{ExeDeptName},
+				</if>
+				<if test="StartDate != null">
+					StartDate=#{StartDate},
+				</if>
+				<if test="ExecDoctorCode != null">
+					ExecDoctorCode=#{ExecDoctorCode},
+				</if>
+				<if test="ExecDoctorName != null">
+					ExecDoctorName=#{ExecDoctorName},
+				</if>
+				<if test="StopcDoctorCode != null">
+					StopcDoctorCode=#{StopcDoctorCode},
+				</if>
+				<if test="StopcDoctorName != null">
+					StopcDoctorName=#{StopcDoctorName},
+				</if>
+				<if test="StopDate != null">
+					StopDate=#{StopDate},
+				</if>
+				<if test="TotalAmount != null">
+					TotalAmount=#{TotalAmount},
+				</if>
+				<if test="OperatorCode != null">
+					OperatorCode=#{OperatorCode},
+				</if>
+				<if test="OperatorName != null">
+					OperatorName=#{OperatorName},
+				</if>
+				<if test="SubmitDate != null">
+					SubmitDate=#{SubmitDate},
+				</if>
+				<if test="RecordState != null">
+					RecordState=#{RecordState},
+				</if>
+	  			
+		</set>
+		WHERE 
+			Srno= #{srno}
+	</update>
+	
+</mapper>

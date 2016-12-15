@@ -1,5 +1,8 @@
 package com.zehin.vpaas.beans;
 
+import java.sql.Date;
+import java.sql.Timestamp;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -9,11 +12,11 @@ import javax.xml.bind.annotation.XmlType;
  * 门诊诊疗服务登记
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "content")
+@XmlRootElement(name = "Content")
 @XmlType(propOrder = { "Srno", "RegNo", "IDCard", "HealthCard", "PatientName", "PatientType", "HospitalCode",
 		"HospitalName", "TreatmentType", "RegTypeCode", "RegTypeName", "IsApp", "AppTypeCode", "AppTypeName", "RegDate",
-		"DeptCode", "DeptName", "GenderCode", "GenderName", "BirthDay", "ClinicFee", "RegFee", "BookFee", "OtherFee",
-		"RegFlag", "OperatorCode", "OperatorName", "SubmitDate", "RecordDate", "ContactPhone", "ContactAddress" })
+		"DeptCode", "DeptName", "GenderCode", "GenderName", "Birthday", "ClinicFee", "RegFee", "BookFee", "OtherFee",
+		"RegFlag", "OperatorCode", "OperatorName", "SubmitDate", "RecordState", "ContactPhone", "ContactAddress" })
 public class DECRegistrationContent {
 	private String Srno;
 	private String RegNo;
@@ -34,7 +37,7 @@ public class DECRegistrationContent {
 	private String DeptName;
 	private String GenderCode;
 	private String GenderName;
-	private String BirthDay;
+	private String Birthday;
 	private String ClinicFee;
 	private String RegFee;
 	private String BookFee;
@@ -42,8 +45,8 @@ public class DECRegistrationContent {
 	private String RegFlag;
 	private String OperatorCode;
 	private String OperatorName;
-	private String SubmitDate;
-	private String RecordDate;
+	private Timestamp SubmitDate;
+	private String RecordState;
 	private String ContactPhone;
 	private String ContactAddress;
 	public String getSrno() {
@@ -160,11 +163,11 @@ public class DECRegistrationContent {
 	public void setGenderName(String genderName) {
 		GenderName = genderName;
 	}
-	public String getBirthDay() {
-		return BirthDay;
+	public String getBirthday() {
+		return Birthday;
 	}
-	public void setBirthDay(String birthDay) {
-		BirthDay = birthDay;
+	public void setBirthday(String birthDay) {
+		Birthday = birthDay;
 	}
 	public String getClinicFee() {
 		return ClinicFee;
@@ -208,17 +211,12 @@ public class DECRegistrationContent {
 	public void setOperatorName(String operatorName) {
 		OperatorName = operatorName;
 	}
-	public String getSubmitDate() {
+	
+	public Timestamp getSubmitDate() {
 		return SubmitDate;
 	}
-	public void setSubmitDate(String submitDate) {
+	public void setSubmitDate(Timestamp submitDate) {
 		SubmitDate = submitDate;
-	}
-	public String getRecordDate() {
-		return RecordDate;
-	}
-	public void setRecordDate(String recordDate) {
-		RecordDate = recordDate;
 	}
 	public String getContactPhone() {
 		return ContactPhone;
@@ -231,5 +229,11 @@ public class DECRegistrationContent {
 	}
 	public void setContactAddress(String contactAddress) {
 		ContactAddress = contactAddress;
+	}
+	private String getRecordState() {
+		return RecordState;
+	}
+	private void setRecordState(String recordState) {
+		RecordState = recordState;
 	}
 }

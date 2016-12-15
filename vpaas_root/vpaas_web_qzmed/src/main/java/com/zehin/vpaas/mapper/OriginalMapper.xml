@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.zehin.vpaas.mapper.OriginalMapper">
+	
+	<resultMap id="rtmpOrginal" type="com.zehin.vpaas.beans.Original" >
+				<id column="RECORDID" property="recordId" />
+				<result column="SERVICETYPE" property="serviceType" />
+				<result column="IDCARD" property="idCard" />
+				<result column="BUSINESSTYPENO" property="businessTypeNo" />
+				<result column="LICENSE" property="license" />
+				<result column="AREACODE" property="areaCode" />
+				<result column="ORGCODE" property="orgCode" />
+				<result column="ORGNAME" property="orgName" />
+				<result column="DOMAINCODE" property="domainCode" />
+				<result column="DOMAINNAME" property="domainName" />
+				<result column="CREATEDATE" property="createDate"  jdbcType="TIMESTAMP"
+				/>
+				<result column="UPDATEDATE" property="updateDate"  jdbcType="TIMESTAMP"
+				/>
+				<result column="HANDLEMARK" property="handleMark" />
+				<result column="BODYXML" property="bodyXml" />
+				
+  	</resultMap>
+  	
+  	<sql id="Base_Column_List" >
+	  		RECORDID,
+	  		SERVICETYPE,
+	  		IDCARD,
+	  		BUSINESSTYPENO,
+	  		LICENSE,
+	  		AREACODE,
+	  		ORGCODE,
+	  		ORGNAME,
+	  		DOMAINCODE,
+	  		DOMAINNAME,
+	  		CREATEDATE,
+	  		UPDATEDATE,
+	  		HANDLEMARK,
+	  		BODYXML	  	
+ 	</sql>
+ 	
+ 	
+ 	<!-- 根据id查询 -->
+	<select id="selectByPrimaryKey" resultMap="rtmpOrginal">
+	    SELECT 
+	    <include refid="Base_Column_List" />
+	    FROM ORIGINAL
+	    WHERE RECORDID = #{recordId}
+ 	 </select>
+	
+	<!-- 查询所有 -->
+	<select id="findAll" resultMap="rtmpOrginal" 
+	    parameterType="com.zehin.vpaas.beans.Original">
+		select
+		<include refid="Base_Column_List" />
+		from ORIGINAL
+	</select>
+
+	<!-- 批量删除 -->
+	<delete id="deleteBT" parameterType="java.lang.String">
+		DELETE FROM
+		ORIGINAL
+		WHERE 
+			RECORDiD
+		IN
+		<foreach item="idItem" collection="array" open="(" separator="," close=")">
+			'${idItem}'
+		</foreach>
+	</delete>
+	
+	<!-- 选择性插入数据 -->
+	<insert id="insertSelective" parameterType="com.zehin.vpaas.beans.Original">
+		INSERT INTO ORIGINAL
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="recordId != null">
+					recordId,
+				</if>
+				<if test="serviceType != null">
+					serviceType,
+				</if>
+				<if test="idCard != null">
+					idCard,
+				</if>
+				<if test="businessTypeNo != null">
+					businessTypeNo,
+				</if>
+				<if test="license != null">
+					license,
+				</if>
+				<if test="areaCode != null">
+					areaCode,
+				</if>
+				<if test="orgCode != null">
+					orgCode,
+				</if>
+				<if test="orgName != null">
+					orgName,
+				</if>
+				<if test="domainCode != null">
+					domainCode,
+				</if>
+				<if test="domainName != null">
+					domainName,
+				</if>
+				<if test="createDate != null">
+					createDate,
+				</if>
+				<if test="updateDate != null">
+					updateDate,
+				</if>
+				<if test="handleMark != null">
+					handleMark,
+				</if>
+				<if test="bodyXml != null">
+					bodyXml,
+				</if>
+		</trim>
+		<trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+				<if test="recordId != null">
+					#{recordId},
+				</if>
+				<if test="serviceType != null">
+					#{serviceType},
+				</if>
+				<if test="idCard != null">
+					#{idCard},
+				</if>
+				<if test="businessTypeNo != null">
+					#{businessTypeNo},
+				</if>
+				<if test="license != null">
+					#{license},
+				</if>
+				<if test="areaCode != null">
+					#{areaCode},
+				</if>
+				<if test="orgCode != null">
+					#{orgCode},
+				</if>
+				<if test="orgName != null">
+					#{orgName},
+				</if>
+				<if test="domainCode != null">
+					#{domainCode},
+				</if>
+				<if test="domainName != null">
+					#{domainName},
+				</if>
+				<if test="createDate != null">
+					#{createDate},
+				</if>
+				<if test="updateDate != null">
+					#{updateDate},
+				</if>
+				<if test="handleMark != null">
+					#{handleMark},
+				</if>
+				<if test="bodyXml != null">
+					#{bodyXml},
+				</if>
+		</trim>
+	</insert>
+	
+	<!-- 保存 -->
+	<update id="updateByPrimaryKeySelective" parameterType="com.zehin.vpaas.beans.Original">
+		UPDATE ORIGINAL
+		<set>
+				<if test="RECORDID != null">
+					RECORDID = #{recordId},
+				</if>
+				<if test="SERVICETYPE != null">
+					SERVICETYPE = #{serviceType},
+				</if>
+				<if test="IDCARD != null">
+					IDCARD = #{idCard},
+				</if>
+				<if test="BUSINESSTYPENO != null">
+					BUSINESSTYPENO = #{businessTypeNo},
+				</if>
+				<if test="LICENSE != null">
+					LICENSE = #{license},
+				</if>
+				<if test="AREACODE != null">
+					AREACODE = #{areaCode},
+				</if>
+				<if test="ORGCODE != null">
+					ORGCODE = #{orgCode},
+				</if>
+				<if test="ORGNAME != null">
+					ORGNAME = #{orgName},
+				</if>
+				<if test="DOMAINCODE != null">
+					DOMAINCODE = #{domainCode},
+				</if>
+				<if test="DOMAINNAME != null">
+					DOMAINNAME = #{domainName},
+				</if>
+				<if test="CREATEDATE != null">
+					CREATEDATE = #{createDate},
+				</if>
+				<if test="UPDATEDATE != null">
+					UPDATEDATE = #{updateDate},
+				</if>
+				<if test="HANDLEMARK != null">
+					HANDLEMARK = #{handleMark},
+				</if>
+				<if test="BODYXML != null">
+					BODYXML = #{bodyXml},
+				</if>
+		</set>
+		WHERE 
+			RECORDID = #{recordId}
+	</update>
+	
+</mapper>

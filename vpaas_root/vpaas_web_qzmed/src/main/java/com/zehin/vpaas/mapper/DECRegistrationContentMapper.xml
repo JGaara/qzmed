@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-
+	
 <mapper namespace="com.zehin.vpaas.mapper.DECRegistrationContentMapper">
-
+	
 	<resultMap id="rtmpDECRegistrationContent" type="com.zehin.vpaas.beans.DECRegistrationContent" >
 				<id column="Srno" property="srno" />
 				<result column="RegNo" property="regNo" />
-				<result column="IDCard" property="iDCard" />
+				<result column="IDCard" property="IDCard" />
 				<result column="HealthCard" property="healthCard" />
 				<result column="PatientName" property="patientName" />
 				<result column="PatientType" property="patientType" />
@@ -32,8 +32,9 @@
 				<result column="RegFlag" property="regFlag" />
 				<result column="OperatorCode" property="operatorCode" />
 				<result column="OperatorName" property="operatorName" />
-				<result column="SubmitDate" property="submitDate" />
-				<result column="RecordDate" property="recordDate" />
+				<result column="SubmitDate" property="submitDate"  jdbcType="TIMESTAMP"
+				/>
+				<result column="RecordState" property="recordState" />
 				<result column="ContactPhone" property="contactPhone" />
 				<result column="ContactAddress" property="contactAddress" />
 			
@@ -68,7 +69,7 @@
 	  		OperatorCode,
 	  		OperatorName,
 	  		SubmitDate,
-	  		RecordDate,
+	  		RecordState,
 	  		ContactPhone,
 	  		ContactAddress
 	  	
@@ -79,7 +80,7 @@
 	<select id="selectByPrimaryKey" resultMap="rtmpDECRegistrationContent">
 	    SELECT 
 	    <include refid="Base_Column_List" />
-	    FROM DECREGISTRATIONCONTENT
+	    FROM V_MZ_GHJK
 	    WHERE Srno = #{srno}
  	 </select>
 	
@@ -88,13 +89,18 @@
 	    parameterType="com.zehin.vpaas.beans.DECRegistrationContent">
 		select
 		<include refid="Base_Column_List" />
-		from DECREGISTRATIONCONTENT
+		from V_MZ_GHJK
 	</select>
-
+	<select id="findByPage" resultMap="rtmpDECRegistrationContent" 
+	    parameterType="com.zehin.vpaas.beans.ViewAccessState">
+		select
+		<include refid="Base_Column_List" />
+		from V_MZ_GHJK where convert(varchar(19),SubmitDate,120) > #{SubmitDate} order by SubmitDate
+	</select>
 	<!-- 批量删除 -->
 	<delete id="deleteBT" parameterType="java.lang.String">
 		DELETE FROM
-		DECREGISTRATIONCONTENT
+		V_MZ_GHJK
 		WHERE 
 			Srno
 		IN
@@ -105,7 +111,7 @@
 	
 	<!-- 选择性插入数据 -->
 	<insert id="insertSelective" parameterType="com.zehin.vpaas.beans.DECRegistrationContent">
-		INSERT INTO DECREGISTRATIONCONTENT
+		INSERT INTO V_MZ_GHJK
 		<trim prefix="(" suffix=")" suffixOverrides=",">
 				<if test="Srno != null">
 					Srno,
@@ -302,7 +308,7 @@
 	
 	<!-- 保存 -->
 	<update id="updateByPrimaryKeySelective" parameterType="com.zehin.vpaas.beans.DECRegistrationContent">
-		UPDATE DECREGISTRATIONCONTENT
+		UPDATE V_MZ_GHJK
 		<set>
 				<if test="Srno != null">
 					Srno = #{Srno},
@@ -400,7 +406,7 @@
 	  			
 		</set>
 		WHERE 
-			Srno= #{srno}
+			Srno= #{Srno}
 	</update>
 	
 </mapper>

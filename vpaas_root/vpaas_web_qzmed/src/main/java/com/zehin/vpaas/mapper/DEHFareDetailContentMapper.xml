@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.zehin.vpaas.mapper.DEHFareDetailContentMapper">
+	
+	<resultMap id="rtmpDEHFareDetailContent" type="com.zehin.vpaas.beans.DEHFareDetailContent" >
+				<id column="FareSrno" property="FareSrno" />
+				<result column="Srno" property="Srno" />
+				<result column="HospitalNO" property="HospitalNO" />
+				<result column="AdviceCode" property="AdviceCode" />
+				<result column="InvoiceCode" property="InvoiceCode" />
+				<result column="IDCard" property="IDCard" />
+				<result column="HealthCard" property="HealthCard" />
+				<result column="PatientName" property="PatientName" />
+				<result column="HospitalCode" property="HospitalCode" />
+				<result column="HospitalName" property="HospitalName" />
+				<result column="RefundFlag" property="RefundFlag" />
+				<result column="PitemCode" property="PitemCode" />
+				<result column="HitemCode" property="HitemCode" />
+				<result column="HitemName" property="HitemName" />
+				<result column="ItemCode" property="ItemCode" />
+				<result column="ItemName" property="ItemName" />
+				<result column="IsDrugs" property="IsDrugs" />
+				<result column="SettleTime" property="SettleTime" />
+				<result column="ItemUnit" property="ItemUnit" />
+				<result column="ItemPrice" property="ItemPrice" />
+				<result column="ItemCount" property="ItemCount" />
+				<result column="ItemAmount" property="ItemAmount" />
+				<result column="RealAmount" property="RealAmount" />
+				<result column="AccountorCode" property="AccountorCode" />
+				<result column="AccountorName" property="AccountorName" />
+				<result column="OperatorCode" property="OperatorCode" />
+				<result column="OperatorName" property="OperatorName" />
+				<result column="SubmitDate" property="SubmitDate" jdbcType="TIMESTAMP"/>
+				<result column="RecordState" property="RecordState" />
+			
+  	</resultMap>
+  	
+  	<sql id="Base_Column_List" >
+	  		FareSrno,
+			Srno,
+			HospitalNO,
+			AdviceCode,
+			InvoiceCode,
+			
+			IDCard,	
+			HealthCard,	
+			PatientName,
+			HospitalCode,
+			HospitalName,
+			
+			RefundFlag,	
+			PitemCode,	
+			HitemCode,
+			HitemName,
+			ItemCode,
+			
+			ItemName,	
+			IsDrugs,	
+			SettleTime,
+			ItemUnit,
+			ItemPrice,
+			
+			ItemCount,	
+			ItemAmount,	
+			RealAmount,
+			AccountorCode,
+			AccountorName,
+			
+			OperatorCode,
+			OperatorName,
+			SubmitDate,
+			RecordState
+	  	
+ 	</sql>
+ 	
+ 	
+ 	<!-- 根据id查询 -->
+	<select id="selectByPrimaryKey" resultMap="rtmpDEHFareDetailContent">
+	    SELECT 
+	    <include refid="Base_Column_List" />
+	    FROM V_ZY_SFMX
+	    WHERE Srno = #{srno}
+ 	 </select>
+	
+	<!-- 查询所有 -->
+	<select id="findAll" resultMap="rtmpDEHFareDetailContent" 
+	    parameterType="com.zehin.vpaas.beans.DEHFareDetailContent">
+		select
+		<include refid="Base_Column_List" />
+		from V_ZY_SFMX
+	</select>
+	<select id="findByPage" resultMap="rtmpDEHFareDetailContent" 
+	    parameterType="com.zehin.vpaas.beans.ViewAccessState">
+		select
+		<include refid="Base_Column_List" />
+		from V_ZY_SFMX where convert(varchar(19),SubmitDate,120) > #{SubmitDate} order by SubmitDate
+		<!-- <if test="SubmitDate != null and SubmitDate !='' and AccessDate != null and AccessDate != ''">
+			SubmitDate between #{SubmitDate} and #{AccessDate} order by SubmitDate
+		</if>-->
+	</select>
+	<!-- 批量删除 -->
+	<delete id="deleteBT" parameterType="java.lang.String">
+		DELETE FROM
+		V_ZY_SFMX
+		WHERE 
+			Srno
+		IN
+		<foreach item="idItem" collection="array" open="(" separator="," close=")">
+			'${idItem}'
+		</foreach>
+	</delete>
+	
+	<!-- 选择性插入数据 -->
+	<insert id="insertSelective" parameterType="com.zehin.vpaas.beans.DEHFareDetailContent">
+		INSERT INTO V_ZY_SFMX
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="FareSrno != null">
+					FareSrno,
+				</if>
+				<if test="Srno != null">
+					Srno,
+				</if>
+				<if test="HospitalNO != null">
+					HospitalNO,
+				</if>
+				<if test="AdviceCode != null">
+					AdviceCode,
+				</if>
+				<if test="InvoiceCode != null">
+					InvoiceCode,
+				</if>
+				<if test="IDCard != null">
+					IDCard,
+				</if>
+				<if test="HealthCard != null">
+					HealthCard,
+				</if>
+				<if test="PatientName != null">
+					PatientName,
+				</if>
+				<if test="HospitalCode != null">
+					HospitalCode,
+				</if>
+				<if test="HospitalName != null">
+					HospitalName,
+				</if>
+				<if test="RefundFlag != null">
+					RefundFlag,
+				</if>
+				<if test="PitemCode != null">
+					PitemCode,
+				</if>
+				<if test="HitemCode != null">
+					HitemCode,
+				</if>
+				<if test="HitemName != null">
+					HitemName,
+				</if>
+				<if test="ItemCode != null">
+					ItemCode,
+				</if>
+				<if test="ItemName != null">
+					ItemName,
+				</if>
+				<if test="IsDrugs != null">
+					IsDrugs,
+				</if>
+				<if test="SettleTime != null">
+					SettleTime,
+				</if>
+				<if test="ItemUnit != null">
+					ItemUnit,
+				</if>
+				<if test="ItemPrice != null">
+					ItemPrice,
+				</if>
+				<if test="ItemCount != null">
+					ItemCount,
+				</if>
+				<if test="ItemAmount != null">
+					ItemAmount,
+				</if>
+				<if test="RealAmount != null">
+					RealAmount,
+				</if>
+				<if test="AccountorCode != null">
+					AccountorCode,
+				</if>
+				<if test="AccountorName != null">
+					AccountorName,
+				</if>
+				<if test="OperatorCode != null">
+					OperatorCode,
+				</if>
+				<if test="OperatorName != null">
+					OperatorName,
+				</if>
+				<if test="SubmitDate != null">
+					SubmitDate,
+				</if>
+				<if test="RecordDate != null">
+					RecordDate,
+				</if>
+		  		
+		</trim>
+		<trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+				<if test="FareSrno != null">
+					#{FareSrno},
+				</if>
+				<if test="Srno != null">
+					#{Srno},
+				</if>
+				<if test="HospitalNO != null">
+					#{HospitalNO},
+				</if>
+				<if test="AdviceCode != null">
+					#{AdviceCode},
+				</if>
+				<if test="InvoiceCode != null">
+					#{InvoiceCode},
+				</if>
+				<if test="IDCard != null">
+					#{IDCard},
+				</if>
+				<if test="HealthCard != null">
+					#{HealthCard},
+				</if>
+				<if test="PatientName != null">
+					#{PatientName},
+				</if>
+				<if test="HospitalCode != null">
+					#{HospitalCode},
+				</if>
+				<if test="HospitalName != null">
+					#{HospitalName},
+				</if>
+				<if test="RefundFlag != null">
+					#{RefundFlag},
+				</if>
+				<if test="PitemCode != null">
+					#{PitemCode},
+				</if>
+				<if test="HitemCode != null">
+					#{HitemCode},
+				</if>
+				<if test="HitemName != null">
+					#{HitemName},
+				</if>
+				<if test="ItemCode != null">
+					#{ItemCode},
+				</if>
+				<if test="ItemName != null">
+					#{ItemName},
+				</if>
+				<if test="IsDrugs != null">
+					#{IsDrugs},
+				</if>
+				<if test="SettleTime != null">
+					#{SettleTime},
+				</if>
+				<if test="ItemUnit != null">
+					#{ItemUnit},
+				</if>
+				<if test="ItemPrice != null">
+					#{ItemPrice},
+				</if>
+				<if test="ItemCount != null">
+					#{ItemCount},
+				</if>
+				<if test="ItemAmount != null">
+					#{ItemAmount},
+				</if>
+				<if test="RealAmount != null">
+					#{RealAmount},
+				</if>
+				<if test="AccountorCode != null">
+					#{AccountorCode},
+				</if>
+				<if test="AccountorName != null">
+					#{AccountorName},
+				</if>
+				<if test="OperatorCode != null">
+					#{OperatorCode},
+				</if>
+				<if test="OperatorName != null">
+					#{OperatorName},
+				</if>
+				<if test="SubmitDate != null">
+					#{SubmitDate},
+				</if>
+				<if test="RecordDate != null">
+					#{RecordDate},
+				</if>
+	  		
+		</trim>
+	</insert>
+	
+	<!-- 保存 -->
+	<update id="updateByPrimaryKeySelective" parameterType="com.zehin.vpaas.beans.DEHFareDetailContent">
+		UPDATE V_ZY_SFMX
+		<set>
+				<if test="FareSrno != null">
+					FareSrno=#{FareSrno},
+				</if>
+				<if test="Srno != null">
+					Srno=#{Srno},
+				</if>
+				<if test="HospitalNO != null">
+					HospitalNO=#{HospitalNO},
+				</if>
+				<if test="AdviceCode != null">
+					AdviceCode=#{AdviceCode},
+				</if>
+				<if test="InvoiceCode != null">
+					InvoiceCode=#{InvoiceCode},
+				</if>
+				<if test="IDCard != null">
+					IDCard=#{IDCard},
+				</if>
+				<if test="HealthCard != null">
+					HealthCard=#{HealthCard},
+				</if>
+				<if test="PatientName != null">
+					PatientName=#{PatientName},
+				</if>
+				<if test="HospitalCode != null">
+					HospitalCode=#{HospitalCode},
+				</if>
+				<if test="HospitalName != null">
+					HospitalName=#{HospitalName},
+				</if>
+				<if test="RefundFlag != null">
+					RefundFlag=#{RefundFlag},
+				</if>
+				<if test="PitemCode != null">
+					PitemCode=#{PitemCode},
+				</if>
+				<if test="HitemCode != null">
+					HitemCode=#{HitemCode},
+				</if>
+				<if test="HitemName != null">
+					HitemName=#{HitemName},
+				</if>
+				<if test="ItemCode != null">
+					ItemCode=#{ItemCode},
+				</if>
+				<if test="ItemName != null">
+					ItemName=#{ItemName},
+				</if>
+				<if test="IsDrugs != null">
+					IsDrugs=#{IsDrugs},
+				</if>
+				<if test="SettleTime != null">
+					SettleTime=#{SettleTime},
+				</if>
+				<if test="ItemUnit != null">
+					SettleTime=#{ItemUnit},
+				</if>
+				<if test="ItemPrice != null">
+					ItemPrice=#{ItemPrice},
+				</if>
+				<if test="ItemCount != null">
+					ItemCount=#{ItemCount},
+				</if>
+				<if test="ItemAmount != null">
+					ItemAmount=#{ItemAmount},
+				</if>
+				<if test="RealAmount != null">
+					RealAmount=#{RealAmount},
+				</if>
+				<if test="AccountorCode != null">
+					AccountorCode=#{AccountorCode},
+				</if>
+				<if test="AccountorName != null">
+					AccountorName=#{AccountorName},
+				</if>
+				<if test="OperatorCode != null">
+					OperatorCode=#{OperatorCode},
+				</if>
+				<if test="OperatorName != null">
+					OperatorName=#{OperatorName},
+				</if>
+				<if test="SubmitDate != null">
+					SubmitDate=#{SubmitDate},
+				</if>
+				<if test="RecordDate != null">
+					RecordDate=#{RecordDate},
+				</if>
+	  			
+		</set>
+		WHERE 
+			Srno= #{srno}
+	</update>
+	
+</mapper>

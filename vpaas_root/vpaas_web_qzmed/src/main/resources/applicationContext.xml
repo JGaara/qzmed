@@ -15,10 +15,8 @@
         http://www.springframework.org/schema/task  http://www.springframework.org/schema/task/spring-task-3.2.xsd"
 	default-lazy-init="false">
 
-
 	<!-- 配置外部数据库连接信息 -->
 	<context:property-placeholder location="classpath:db.properties" />
-
 	<!-- 自动扫描的包名 -->
 	<context:component-scan base-package="com.zehin.vpaas">
 		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
@@ -26,6 +24,7 @@
 
 	<bean id="propertyConfigurer"
 		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property  name="fileEncoding" value="UTF-8"/>
 		<property name="locations">
 			<list>
 				<value>classpath:config.properties</value>
@@ -62,13 +61,66 @@
 		<property name="filters" value="stat" />
 	</bean>
 
-	<bean id="mysqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	<!-- <bean id="mysqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="dataSource" ref="dataSourceOne" />
 		<property name="configLocation" value="classpath:/mybatis-Configuration.xml" />
 	</bean>
 	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
 		<constructor-arg index="0" ref="mysqlSessionFactory"></constructor-arg>
 	</bean>
+ -->
+
+	<!-- sql server 数据源配置 -->
+	<bean id="dataSourceTwo" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<!-- 基本属性 url、user、password -->
+		<property name="driverClassName" value="${jdbc.sql.driverClassName}"></property>
+		<property name="url" value="${jdbc.sql.url}" />
+		<property name="username" value="${jdbc.sql.username}" />
+		<property name="password" value="${jdbc.sql.password}" />
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="initialSize" value="${ds.initialSize}" />
+		<property name="minIdle" value="${ds.minIdle}" />
+		<property name="maxActive" value="${ds.maxActive}" />
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="${ds.maxWait}" />
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="${ds.timeBetweenEvictionRunsMillis}" />
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="${ds.minEvictableIdleTimeMillis}" />
+		<property name="validationQuery" value="SELECT 'x'" />
+		<property name="testWhileIdle" value="true" />
+		<property name="testOnBorrow" value="false" />
+		<property name="testOnReturn" value="false" />
+		<!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+		<property name="poolPreparedStatements" value="true" />
+		<property name="maxPoolPreparedStatementPerConnectionSize"
+			value="20" />
+		<!-- 配置监控统计拦截的filters -->
+		<property name="filters" value="stat" />
+	</bean>
+
+	<bean id="sqlServerSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="multipleDataSource" />
+	 	<property name="configLocation" value="classpath:/mybatis-Configuration.xml" />  
+	</bean>
+	<bean id="sqlServerSession" class="org.mybatis.spring.SqlSessionTemplate" scope="prototype">
+		<constructor-arg index="0" ref="sqlServerSessionFactory"></constructor-arg>
+	</bean>
+
+	<bean id="multipleDataSource" class="com.zehin.vpaas.generic.MultipleDataSource">
+		<property name="defaultTargetDataSource" ref="dataSourceOne"></property>
+		<property name="targetDataSources">
+			<map>
+				<entry key="dataSourceOne" value-ref="dataSourceOne"></entry>
+				<entry key="dataSourceTwo" value-ref="dataSourceTwo"></entry>
+			</map>
+		</property>
+	</bean>
+
+
+
+
 
 	<!-- 扫描 basePackage下所有的接口，根据对应的mapper.xml为其生成代理类 -->
 	<bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
@@ -83,7 +135,11 @@
 	</bean>
 	
 	<!-- 定时器的配置 -->
-	<task:scheduler id="scheduler" pool-size="10" />  
+	<bean id = "conversionTask" class="com.zehin.vpaas.generic.ConversionTask"/>
+	<task:scheduler id="scheduler" pool-size="10" />
+	<task:scheduled-tasks scheduler="scheduler">
+        <task:scheduled ref="conversionTask" method="convert" cron="0 0 1 * * ?"/>
+    </task:scheduled-tasks>  
     <task:executor id="executor" keep-alive="3600" pool-size="100-200" 
     	queue-capacity="500" rejection-policy="CALLER_RUNS" /> 
     <task:annotation-driven executor="executor" scheduler="scheduler" />
@@ -137,7 +193,7 @@
 
 	<bean name="transactionManager"
 		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-		<property name="dataSource" ref="dataSourceOne"></property>
+		<property name="dataSource" ref="multipleDataSource"></property>
 	</bean>
 
 	<tx:advice id="txAdvice" transaction-manager="transactionManager">
@@ -156,12 +212,41 @@
 				rollback-for="java.lang.Exception" />
 		</tx:attributes>
 	</tx:advice>
-
 	<aop:config>
 		<aop:pointcut id="transactionmobilePointCut"
 			expression="execution(* com.zehin.vpaas.*.service..*.*(..))" />
 		<aop:advisor advice-ref="txAdvice" pointcut-ref="transactionmobilePointCut" />
 	</aop:config>
-
+	
+	<bean id="springBeanUtil" class="com.zehin.vpaas.common.util.SpringBeanUtil" />
+	<!-- 数据库操作类 -->
+	<bean id = "decRegistrationContentService" class = "com.zehin.vpaas.service.impl.DECRegistrationContentServiceImpl">
+	</bean>
+	<bean id = "decDrugAdviceContentService" class = "com.zehin.vpaas.service.impl.DECDrugAdviceContentServiceImpl">
+	</bean>
+	<bean id = "decDrugAdviceDetailContentService" class = "com.zehin.vpaas.service.impl.DECDrugAdviceDetailContentServiceImpl">
+	</bean>
+	<bean id = "decFareBalanceContentService" class = "com.zehin.vpaas.service.impl.DECFareBalanceContentServiceImpl">
+	</bean>
+	<bean id = "decFareDetailContentService" class = "com.zehin.vpaas.service.impl.DECFareDetailContentServiceImpl">
+	</bean>
+	<bean id = "decTreatmentRecordsContentService" class = "com.zehin.vpaas.service.impl.DECTreatmentRecordsContentServiceImpl">
+	</bean>
+	<bean id = "dehRegistrationContentService" class = "com.zehin.vpaas.service.impl.DEHRegistrationContentServiceImpl">
+	</bean>
+	<bean id = "dehDrugAdviceDetailContentService" class = "com.zehin.vpaas.service.impl.DEHDrugAdviceDetailContentServiceImpl">
+	</bean>
+	<bean id = "dehDrugAdviceContentService" class = "com.zehin.vpaas.service.impl.DEHDrugAdviceContentServiceImpl">
+	</bean>
+	<bean id = "dehFareBalanceContentService" class = "com.zehin.vpaas.service.impl.DEHFareBalanceContentServiceImpl">
+	</bean>
+	<bean id = "dehFareDetailContentService" class = "com.zehin.vpaas.service.impl.DEHFareDetailContentServiceImpl">
+	</bean>
+	<bean id = "originalService" class = "com.zehin.vpaas.service.impl.OriginalServiceImpl">
+	</bean>
+	<bean id = "viewAccessStateService" class = "com.zehin.vpaas.service.impl.ViewAccessStateServiceimpl">
+	</bean>
+	
+	
 </beans>
 					
