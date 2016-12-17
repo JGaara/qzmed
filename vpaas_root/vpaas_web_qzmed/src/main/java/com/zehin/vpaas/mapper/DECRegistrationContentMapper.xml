@@ -24,7 +24,7 @@
 				<result column="DeptName" property="deptName" />
 				<result column="GenderCode" property="genderCode" />
 				<result column="GenderName" property="genderName" />
-				<result column="BirthDay" property="birthDay" />
+				<result column="Birthday" property="Birthday" />
 				<result column="ClinicFee" property="clinicFee" />
 				<result column="RegFee" property="regFee" />
 				<result column="BookFee" property="bookFee" />
@@ -60,7 +60,7 @@
 	  		DeptName,
 	  		GenderCode,
 	  		GenderName,
-	  		BirthDay,
+	  		Birthday,
 	  		ClinicFee,
 	  		RegFee,
 	  		BookFee,
@@ -170,8 +170,8 @@
 				<if test="GenderName != null">
 					GenderName,
 				</if>
-				<if test="BirthDay != null">
-					BirthDay,
+				<if test="Birthday != null">
+					Birthday,
 				</if>
 				<if test="ClinicFee != null">
 					ClinicFee,
@@ -266,8 +266,8 @@
 				<if test="GenderName != null">
 					#{GenderName},
 				</if>
-				<if test="BirthDay != null">
-					#{BirthDay},
+				<if test="Birthday != null">
+					#{Birthday},
 				</if>
 				<if test="ClinicFee != null">
 					#{ClinicFee},
@@ -367,8 +367,8 @@
 				<if test="GenderName != null">
 					GenderName = #{GenderName},
 				</if>
-				<if test="BirthDay != null">
-					BirthDay = #{birthDay},
+				<if test="Birthday != null">
+					Birthday = #{Birthday},
 				</if>
 				<if test="ClinicFee != null">
 					ClinicFee = #{ClinicFee},
