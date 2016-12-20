@@ -69,7 +69,7 @@ public class ConversionTask {
 		//获取数据库操作类.
 		DEHDrugAdviceDetailContentServiceImpl service = SpringBeanUtil.getBean("dehDrugAdviceDetailContentService");
 		DEHDrugAdviceDetailContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DEHDrugAdviceDetailContentMapper.class);
-		service.setMapper(mapper);
+		
 		
 		//数据库list
 		List<DEHDrugAdviceDetailContent> resultList = null;
@@ -80,6 +80,7 @@ public class ConversionTask {
 		//上次访问状态.
 		ViewAccessState vas = lastAccess(CommonCode.ViewNameZYYZMX);
 		//获取第一页
+		service.setMapper(mapper);
 		Page<DEHDrugAdviceDetailContent> page = PageHelper.startPage(pageNum, pageSize);		
 		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
@@ -192,7 +193,7 @@ public class ConversionTask {
 		//获取数据库操作类.
 		DEHFareBalanceContentServiceImpl service = SpringBeanUtil.getBean("dehFareBalanceContentService");
 		DEHFareBalanceContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DEHFareBalanceContentMapper.class);
-		service.setMapper(mapper);
+		
 		
 		//数据库list
 		List<DEHFareBalanceContent> resultList = null;
@@ -203,6 +204,7 @@ public class ConversionTask {
 		//上次访问状态.
 		ViewAccessState vas = lastAccess(CommonCode.ViewNameZYFYJS);
 		//获取第一页
+		service.setMapper(mapper);
 		Page<DEHFareBalanceContent> page = PageHelper.startPage(pageNum, pageSize);		
 		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
@@ -314,7 +316,7 @@ public class ConversionTask {
 		//获取数据库操作类.
 		DEHFareDetailContentServiceImpl service = SpringBeanUtil.getBean("dehFareDetailContentService");
 		DEHFareDetailContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DEHFareDetailContentMapper.class);
-		service.setMapper(mapper);
+		
 		
 		//数据库list
 		List<DEHFareDetailContent> resultList = null;
@@ -325,6 +327,7 @@ public class ConversionTask {
 		//上次访问状态.
 		ViewAccessState vas = lastAccess(CommonCode.ViewNameZYSFMX);
 		//获取第一页
+		service.setMapper(mapper);
 		Page<DEHFareDetailContent> page = PageHelper.startPage(pageNum, pageSize);		
 		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
@@ -436,7 +439,7 @@ public class ConversionTask {
 		//获取数据库操作类.
 		DEHDrugAdviceContentServiceImpl service = SpringBeanUtil.getBean("dehDrugAdviceContentService");
 		DEHDrugAdviceContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DEHDrugAdviceContentMapper.class);
-		service.setMapper(mapper);
+		
 		
 		//数据库list
 		List<DEHDrugAdviceContent> resultList = null;
@@ -447,6 +450,7 @@ public class ConversionTask {
 		//上次访问状态.
 		ViewAccessState vas = lastAccess(CommonCode.ViewNameZYYZZB);
 		//获取第一页
+		service.setMapper(mapper);
 		Page<DEHDrugAdviceContent> page = PageHelper.startPage(pageNum, pageSize);		
 		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
@@ -558,7 +562,7 @@ public class ConversionTask {
 		//获取数据库操作类.
 		DEHRegistrationContentServiceImpl service = SpringBeanUtil.getBean("dehRegistrationContentService");
 		DEHRegistrationContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DEHRegistrationContentMapper.class);
-		service.setMapper(mapper);
+		
 		
 		//数据库list
 		List<DEHRegistrationContent> resultList = null;
@@ -569,6 +573,7 @@ public class ConversionTask {
 		//上次访问状态.
 		ViewAccessState vas = lastAccess(CommonCode.ViewNameZYFWDJ);
 		//获取第一页
+		service.setMapper(mapper);
 		Page<DEHRegistrationContent> page = PageHelper.startPage(pageNum, pageSize);		
 		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
@@ -685,7 +690,7 @@ public class ConversionTask {
 		//获取数据库操作类.
 		DECTreatmentRecordsContentServiceImpl service = SpringBeanUtil.getBean("decTreatmentRecordsContentService");
 		DECTreatmentRecordsContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DECTreatmentRecordsContentMapper.class);
-		service.setMapper(mapper);
+		
 		
 		//数据库list
 		List<DECTreatmentRecordsContent> resultList = null;
@@ -696,6 +701,7 @@ public class ConversionTask {
 		//上次访问状态.
 		ViewAccessState vas = lastAccess(CommonCode.ViewNameMZJZJL);
 		//获取第一页
+		service.setMapper(mapper);
 		Page<DECTreatmentRecordsContent> page = PageHelper.startPage(pageNum, pageSize);		
 		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
@@ -809,7 +815,6 @@ public class ConversionTask {
 		//获取数据库操作类.
 		DECRegistrationContentServiceImpl service = SpringBeanUtil.getBean("decRegistrationContentService");
 		DECRegistrationContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DECRegistrationContentMapper.class);
-		service.setMapper(mapper);
 		
 		//数据库list
 		List<DECRegistrationContent> resultList = null;
@@ -820,6 +825,7 @@ public class ConversionTask {
 		//上次访问状态.
 		ViewAccessState vas = lastAccess(CommonCode.ViewNameMZZLDJ);
 		//获取第一页
+		service.setMapper(mapper);
 		Page<DECRegistrationContent> page = PageHelper.startPage(pageNum, pageSize);		
 		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
@@ -943,6 +949,7 @@ public class ConversionTask {
 		//上次访问状态.
 		ViewAccessState vas = lastAccess(CommonCode.ViewNameMZSFMX);
 		//获取第一页
+		service.setMapper(mapper);
 		Page<DECFareDetailContent> page = PageHelper.startPage(pageNum, pageSize);		
 		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
@@ -1056,7 +1063,7 @@ public class ConversionTask {
 		//获取数据库操作类.
 		DECFareBalanceContentServiceImpl service = SpringBeanUtil.getBean("decFareBalanceContentService");
 		DECFareBalanceContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DECFareBalanceContentMapper.class);
-		service.setMapper(mapper);
+		
 		
 		//数据库list
 		List<DECFareBalanceContent> resultList = null;
@@ -1067,6 +1074,7 @@ public class ConversionTask {
 		//上次访问状态.
 		ViewAccessState vas = lastAccess(CommonCode.ViewNameMZFYJS);
 		//获取第一页
+		service.setMapper(mapper);
 		Page<DECFareBalanceContent> page = PageHelper.startPage(pageNum, pageSize);		
 		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
@@ -1179,7 +1187,7 @@ public class ConversionTask {
 		//获取数据库操作类.
 		DECDrugAdviceContentServiceImpl service = SpringBeanUtil.getBean("decDrugAdviceContentService");
 		DECDrugAdviceContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DECDrugAdviceContentMapper.class);
-		service.setMapper(mapper);
+		
 		
 		//数据库list
 		List<DECDrugAdviceContent> resultList = null;
@@ -1190,6 +1198,7 @@ public class ConversionTask {
 		//上次访问状态.
 		ViewAccessState vas = lastAccess(CommonCode.ViewNameMZCFZB);
 		//获取第一页
+		service.setMapper(mapper);
 		Page<DECDrugAdviceContent> page = PageHelper.startPage(pageNum, pageSize);		
 		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
@@ -1301,7 +1310,7 @@ public class ConversionTask {
 		//获取数据库操作类.
 		DECDrugAdviceDetailContentServiceImpl service = SpringBeanUtil.getBean("decDrugAdviceDetailContentService");
 		DECDrugAdviceDetailContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DECDrugAdviceDetailContentMapper.class);
-		service.setMapper(mapper);
+		
 		
 		//数据库list
 		List<DECDrugAdviceDetailContent> resultList = null;
@@ -1312,6 +1321,7 @@ public class ConversionTask {
 		//上次访问状态.
 		ViewAccessState vas = lastAccess(CommonCode.ViewNameMZCFMX);
 		//获取第一页
+		service.setMapper(mapper);
 		Page<DECDrugAdviceDetailContent> page = PageHelper.startPage(pageNum, pageSize);		
 		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
