@@ -108,6 +108,7 @@ public class ConversionTask {
 			updateState(newLast);
 			//获取下一页，取出时间相同的。
 			pi.setPageNum(++pageNum);
+			service.setMapper(mapper);
 			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
 			originalList = new ArrayList();
@@ -153,6 +154,7 @@ public class ConversionTask {
 				updateState(newLast);
 				//获取下一页，取出时间相同的。
 				pi.setPageNum(++pageNum);
+				service.setMapper(mapper);
 				PageHelper.startPage(pageNum, pageSize);	
 				resultList = service.findByPage(vas);
 				originalList = new ArrayList();
@@ -229,6 +231,7 @@ public class ConversionTask {
 			updateState(newLast);
 			//获取下一页，取出时间相同的。
 			pi.setPageNum(++pageNum);
+			service.setMapper(mapper);
 			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
 			originalList = new ArrayList();
@@ -274,6 +277,7 @@ public class ConversionTask {
 				updateState(newLast);
 				//获取下一页，取出时间相同的。
 				pi.setPageNum(++pageNum);
+				service.setMapper(mapper);
 				PageHelper.startPage(pageNum, pageSize);	
 				resultList = service.findByPage(vas);
 				originalList = new ArrayList();
@@ -349,6 +353,7 @@ public class ConversionTask {
 			updateState(newLast);
 			//获取下一页，取出时间相同的。
 			pi.setPageNum(++pageNum);
+			service.setMapper(mapper);
 			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
 			originalList = new ArrayList();
@@ -394,6 +399,7 @@ public class ConversionTask {
 				updateState(newLast);
 				//获取下一页，取出时间相同的。
 				pi.setPageNum(++pageNum);
+				service.setMapper(mapper);
 				PageHelper.startPage(pageNum, pageSize);	
 				resultList = service.findByPage(vas);
 				originalList = new ArrayList();
@@ -469,6 +475,7 @@ public class ConversionTask {
 			updateState(newLast);
 			//获取下一页，取出时间相同的。
 			pi.setPageNum(++pageNum);
+			service.setMapper(mapper);
 			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
 			originalList = new ArrayList();
@@ -514,6 +521,7 @@ public class ConversionTask {
 				updateState(newLast);
 				//获取下一页，取出时间相同的。
 				pi.setPageNum(++pageNum);
+				service.setMapper(mapper);
 				PageHelper.startPage(pageNum, pageSize);	
 				resultList = service.findByPage(vas);
 				originalList = new ArrayList();
@@ -589,6 +597,7 @@ public class ConversionTask {
 			updateState(newLast);
 			//获取下一页，取出时间相同的。
 			pi.setPageNum(++pageNum);
+			service.setMapper(mapper);
 			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
 			originalList = new ArrayList();
@@ -634,6 +643,7 @@ public class ConversionTask {
 				updateState(newLast);
 				//获取下一页，取出时间相同的。
 				pi.setPageNum(++pageNum);
+				service.setMapper(mapper);
 				PageHelper.startPage(pageNum, pageSize);	
 				resultList = service.findByPage(vas);
 				originalList = new ArrayList();
@@ -714,6 +724,7 @@ public class ConversionTask {
 			updateState(newLast);
 			//获取下一页，取出时间相同的。
 			pi.setPageNum(++pageNum);
+			service.setMapper(mapper);
 			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
 			originalList = new ArrayList();
@@ -759,6 +770,7 @@ public class ConversionTask {
 				updateState(newLast);
 				//获取下一页，取出时间相同的。
 				pi.setPageNum(++pageNum);
+				service.setMapper(mapper);
 				PageHelper.startPage(pageNum, pageSize);	
 				resultList = service.findByPage(vas);
 				originalList = new ArrayList();
@@ -836,6 +848,7 @@ public class ConversionTask {
 			updateState(newLast);
 			//获取下一页，取出时间相同的。
 			pi.setPageNum(++pageNum);
+			service.setMapper(mapper);
 			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
 			originalList = new ArrayList();
@@ -881,6 +894,7 @@ public class ConversionTask {
 				updateState(newLast);
 				//获取下一页，取出时间相同的。
 				pi.setPageNum(++pageNum);
+				service.setMapper(mapper);
 				PageHelper.startPage(pageNum, pageSize);	
 				resultList = service.findByPage(vas);
 				originalList = new ArrayList();
@@ -957,6 +971,7 @@ public class ConversionTask {
 			updateState(newLast);
 			//获取下一页，取出时间相同的。
 			pi.setPageNum(++pageNum);
+			service.setMapper(mapper);
 			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
 			originalList = new ArrayList();
@@ -1002,6 +1017,7 @@ public class ConversionTask {
 				updateState(newLast);
 				//获取下一页，取出时间相同的。
 				pi.setPageNum(++pageNum);
+				service.setMapper(mapper);
 				PageHelper.startPage(pageNum, pageSize);	
 				resultList = service.findByPage(vas);
 				originalList = new ArrayList();
@@ -1079,6 +1095,7 @@ public class ConversionTask {
 			updateState(newLast);
 			//获取下一页，取出时间相同的。
 			pi.setPageNum(++pageNum);
+			service.setMapper(mapper);
 			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
 			originalList = new ArrayList();
@@ -1124,6 +1141,7 @@ public class ConversionTask {
 				updateState(newLast);
 				//获取下一页，取出时间相同的。
 				pi.setPageNum(++pageNum);
+				service.setMapper(mapper);
 				PageHelper.startPage(pageNum, pageSize);	
 				resultList = service.findByPage(vas);
 				originalList = new ArrayList();
@@ -1200,6 +1218,7 @@ public class ConversionTask {
 			updateState(newLast);
 			//获取下一页，取出时间相同的。
 			pi.setPageNum(++pageNum);
+			service.setMapper(mapper);
 			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
 			originalList = new ArrayList();
@@ -1245,6 +1264,7 @@ public class ConversionTask {
 				updateState(newLast);
 				//获取下一页，取出时间相同的。
 				pi.setPageNum(++pageNum);
+				service.setMapper(mapper);
 				PageHelper.startPage(pageNum, pageSize);	
 				resultList = service.findByPage(vas);
 				originalList = new ArrayList();
@@ -1320,6 +1340,7 @@ public class ConversionTask {
 			updateState(newLast);
 			//获取下一页，取出时间相同的。
 			pi.setPageNum(++pageNum);
+			service.setMapper(mapper);
 			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
 			originalList = new ArrayList();
@@ -1365,6 +1386,7 @@ public class ConversionTask {
 				updateState(newLast);
 				//获取下一页，取出时间相同的。
 				pi.setPageNum(++pageNum);
+				service.setMapper(mapper);
 				PageHelper.startPage(pageNum, pageSize);	
 				resultList = service.findByPage(vas);
 				originalList = new ArrayList();
