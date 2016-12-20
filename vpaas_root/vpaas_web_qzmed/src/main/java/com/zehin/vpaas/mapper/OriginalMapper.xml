@@ -40,7 +40,25 @@
 	  		HANDLEMARK,
 	  		BODYXML	  	
  	</sql>
- 	
+ 	<insert id ="insert" parameterType= "com.zehin.vpaas.beans.Original">
+ 		insert into ORIGINAL (RECORDID,SERVICETYPE,IDCARD,BUSINESSTYPENO,LICENSE,AREACODE,
+	  		ORGCODE,ORGNAME,DOMAINCODE,DOMAINNAME,CREATEDATE,UPDATEDATE,
+	  		HANDLEMARK,BODYXML) values(
+	  				#{recordId},
+					#{serviceType},
+					#{idCard},
+					#{businessTypeNo},
+					#{license},
+					#{areaCode},
+					#{orgCode},
+					#{orgName},
+					#{domainCode},
+					#{domainName},
+					#{createDate,  jdbcType=TIMESTAMP},
+					#{updateDate,  jdbcType=TIMESTAMP},
+					#{handleMark},
+					#{bodyXml})
+ 	</insert>
  	
  	<!-- 根据id查询 -->
 	<select id="selectByPrimaryKey" resultMap="rtmpOrginal">

@@ -121,7 +121,7 @@
 	resultMap="rtmpDEHDrugAdviceDetailContent" >
 		select
 		<include refid="Base_Column_List" />
-		from V_ZY_YZMX where convert(varchar(19),SubmitDate,120) > #{SubmitDate} order by SubmitDate
+		from V_ZY_YZMX where SubmitDate between #{SubmitDate} and #{AccessDate}
 	</select>
 	
 	<!-- 批量删除 -->

@@ -138,7 +138,7 @@
 	<bean id = "conversionTask" class="com.zehin.vpaas.generic.ConversionTask"/>
 	<task:scheduler id="scheduler" pool-size="10" />
 	<task:scheduled-tasks scheduler="scheduler">
-        <task:scheduled ref="conversionTask" method="convert" cron="0 0 1 * * ?"/>
+        <task:scheduled ref="conversionTask" method="convert" cron="0 0 0/1 * * ?"/>
     </task:scheduled-tasks>  
     <task:executor id="executor" keep-alive="3600" pool-size="100-200" 
     	queue-capacity="500" rejection-policy="CALLER_RUNS" /> 

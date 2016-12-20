@@ -8,9 +8,10 @@
      <!--    <setting name="mapUnderscoreToCamelCase" value="true" />  -->
   <!--   </settings> -->
 
-<!--	<settings>
+<!-- 	<settings>
 		<setting name="logImpl" value="STDOUT_LOGGING" />
-	</settings> -->
+	</settings>
+	 --> 
     <typeAliases>
     	<package name="com.zehin.vpaas.base.domain"/>  	 
     </typeAliases>

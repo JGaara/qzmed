@@ -85,7 +85,7 @@ public class DECDrugAdvice {
 		
 		SimpleDateFormat dateFormater = new SimpleDateFormat("yyyyMMddHHmm");
 		String date = dateFormater.format(new Date());
-		//这个地方是用hosCode还是hosLicense？
+		//这个地方是用hosCode
 		String recordId = hosInfo.getHosCode() + date + serialNum;
 		o.setRecordId(recordId);
 		//卫生采集

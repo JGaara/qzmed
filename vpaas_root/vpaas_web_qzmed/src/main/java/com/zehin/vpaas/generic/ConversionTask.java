@@ -11,12 +11,21 @@ import com.zehin.vpaas.service.impl.*;
 import com.github.pagehelper.*;
 public class ConversionTask {
     private SerialNumGenerator sng;
-    private final int pageSize = 200;
+    private final int pageSize = 60000;
+    private final int taskSize = 1000000;
+    private int taskCurrent = 0;
     private static Logger logger = Logger.getLogger("ConversionTask.class");
     public ConversionTask() {
+    	taskCurrent = 0;
     	sng = new SerialNumGenerator();
     }
-	public void convert() {
+    
+    /**
+     * 
+     * @return 0.正常结束     1.失败。
+     */
+	public int convert() {
+		try {
 		logger.info("启动转存...");
 		//门诊诊疗登记
 		carryDECRegistration();
@@ -43,91 +52,246 @@ public class ConversionTask {
 		//住院费用结算
 		carryDEHFareBalance();
 		logger.info("转存完毕...");
+		return 0;
+		} catch(Exception e) {
+			e.printStackTrace();
+			logger.info(e.getStackTrace());
+			return 1;
+			
+		}
 	}
 	
 	
 	public void carryDEHDrugAdviceDetail() {
-		ViewAccessState vas = lastAccess(CommonCode.ViewNameZYYZMX);
-		System.out.println(vas.getSubmitDate());
+		//如果任务数量完成，退出。
+		if(taskCurrent >= taskSize) {return;}
+		
+		//获取数据库操作类.
 		DEHDrugAdviceDetailContentServiceImpl service = SpringBeanUtil.getBean("dehDrugAdviceDetailContentService");
 		DEHDrugAdviceDetailContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DEHDrugAdviceDetailContentMapper.class);
-		//切换数据库，并设置mapper.
 		service.setMapper(mapper);
 		
+		//数据库list
 		List<DEHDrugAdviceDetailContent> resultList = null;
+		List<Original> originalList = new ArrayList();
+		
 		int pageNum = 1;
-		Page<DEHDrugAdviceDetailContent> page = PageHelper.startPage(pageNum, pageSize);
+		
+		//上次访问状态.
+		ViewAccessState vas = lastAccess(CommonCode.ViewNameZYYZMX);
+		//获取第一页
+		Page<DEHDrugAdviceDetailContent> page = PageHelper.startPage(pageNum, pageSize);		
+		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
 		PageInfo<DEHDrugAdviceDetailContent> pi = new PageInfo<DEHDrugAdviceDetailContent>(page);
-		//总页数
-		long totalPages = pi.getPages();
-		Iterator<DEHDrugAdviceDetailContent> it = resultList.iterator();
-		while(it.hasNext()) {
-			DEHDrugAdviceDetailContent content = (DEHDrugAdviceDetailContent) it.next();
+		taskCurrent += resultList.size();
+		System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+		
+		//转换第一页
+		for(int i = 0; i < resultList.size(); i++) {
+			DEHDrugAdviceDetailContent content = resultList.get(i);
 			Original o = DEHDrugAdviceDetail.getOriginal(content, sng.getNum());
-	//		//System.out.println(content.getPatientName());
-			writeToOriginal(o);
+			originalList.add(o);
 		}
-		pi.setPageNum(++pageNum);
-		System.out.println("hh" + resultList.size());
-		while(pageNum <= totalPages) {
-			service.setMapper(mapper);
-			PageHelper.startPage(pageNum, pageSize);
+		
+		//写入第一页
+		System.out.println("before write:" + pageNum + ", time:"+ new Date());
+		writeToOriginal(originalList);
+		
+		
+		//判断任务完成量,如果完成，退出，如果未完成继续。
+		if (taskCurrent >= taskSize) {
+			//记录
+			DEHDrugAdviceDetailContent contentLast = resultList.get(resultList.size() - 1);
+			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameZYYZMX, new java.sql.Timestamp(new java.util.Date().getTime()),
+					"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+			updateState(newLast);
+			//获取下一页，取出时间相同的。
+			pi.setPageNum(++pageNum);
+			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
-			
-			it = resultList.iterator();
-			while(it.hasNext()) {
-				DEHDrugAdviceDetailContent content = (DEHDrugAdviceDetailContent) it.next();
+			originalList = new ArrayList();
+			for(int i = 0; i < resultList.size(); i++) {
+				DEHDrugAdviceDetailContent content = resultList.get(i);
+				if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+					break;
+				}
 				Original o = DEHDrugAdviceDetail.getOriginal(content, sng.getNum());
-				writeToOriginal(o);
+				originalList.add(o);
 			}
+			if(originalList.size() > 0) {
+				writeToOriginal(originalList);
+			}
+			return;
+		}
+		System.out.println("after write:" + pageNum + ", time:"+ new Date());
+		
+		//获取后续页
+		long totalPages = pi.getPages();
+		pi.setPageNum(++pageNum);
+		while(pageNum <= totalPages) {
+			originalList = new ArrayList();
+			service.setMapper(mapper);
+			
+			System.out.println("find a page:" + pageNum + ", time:"+ new Date());
+			PageHelper.startPage(pageNum, pageSize);	
+			resultList = service.findByPage(vas);
+			taskCurrent += resultList.size();
+			System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+			for(int i = 0; i < resultList.size(); i++) {
+				DEHDrugAdviceDetailContent content = resultList.get(i);
+				Original o = DEHDrugAdviceDetail.getOriginal(content, sng.getNum());
+				originalList.add(o);
+			}
+			System.out.println("before write:" + pageNum + ", time:"+ new Date());
+			writeToOriginal(originalList);
+			if (taskCurrent >= taskSize) {
+				//记录
+				DEHDrugAdviceDetailContent contentLast = resultList.get(resultList.size() - 1);
+				ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameZYYZMX, new java.sql.Timestamp(new java.util.Date().getTime()),
+						"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+				updateState(newLast);
+				//获取下一页，取出时间相同的。
+				pi.setPageNum(++pageNum);
+				PageHelper.startPage(pageNum, pageSize);	
+				resultList = service.findByPage(vas);
+				originalList = new ArrayList();
+				for(int i = 0; i < resultList.size(); i++) {
+					DEHDrugAdviceDetailContent content = resultList.get(i);
+					if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+						break;
+					}
+					Original o = DEHDrugAdviceDetail.getOriginal(content, sng.getNum());
+					originalList.add(o);
+				}
+				if(originalList.size() > 0) {
+					
+					writeToOriginal(originalList);
+				}
+				return;
+			}
+			System.out.println("after write:" + pageNum + ", time:"+ new Date());
+			pi.setPageNum(++pageNum);
 		}
 		
 		//如果有新的，更新记录。
 		if(resultList.size() > 0) {
 			DEHDrugAdviceDetailContent content = resultList.get(resultList.size() - 1);
-			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameZYYZMX, new java.sql.Timestamp(new Date().getTime()),
+			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameZYYZMX, new java.sql.Timestamp(new java.util.Date().getTime()),
 					"1", new java.sql.Timestamp(content.getSubmitDate().getTime()));
 			updateState(newLast);
-		}
-		
+		}		
 		logger.info("住院医嘱明细转存完毕。");
 	}
 	public void carryDEHFareBalance() {
-		ViewAccessState vas = lastAccess(CommonCode.ViewNameZYFYJS);
-		System.out.println(vas.getSubmitDate());
+		//如果任务数量完成，退出。
+		if(taskCurrent >= taskSize) {return;}
+		
+		//获取数据库操作类.
 		DEHFareBalanceContentServiceImpl service = SpringBeanUtil.getBean("dehFareBalanceContentService");
 		DEHFareBalanceContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DEHFareBalanceContentMapper.class);
-		//切换数据库，并设置mapper.
 		service.setMapper(mapper);
 		
+		//数据库list
 		List<DEHFareBalanceContent> resultList = null;
+		List<Original> originalList = new ArrayList();
+		
 		int pageNum = 1;
-		Page<DEHFareBalanceContent> page = PageHelper.startPage(pageNum, pageSize);
+		
+		//上次访问状态.
+		ViewAccessState vas = lastAccess(CommonCode.ViewNameZYFYJS);
+		//获取第一页
+		Page<DEHFareBalanceContent> page = PageHelper.startPage(pageNum, pageSize);		
+		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
 		PageInfo<DEHFareBalanceContent> pi = new PageInfo<DEHFareBalanceContent>(page);
-		//总页数
-		long totalPages = pi.getPages();
-		Iterator<DEHFareBalanceContent> it = resultList.iterator();
-		while(it.hasNext()) {
-			DEHFareBalanceContent content = (DEHFareBalanceContent) it.next();
+		taskCurrent += resultList.size();
+		System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+		
+		//转换第一页
+		for(int i = 0; i < resultList.size(); i++) {
+			DEHFareBalanceContent content = resultList.get(i);
 			Original o = DEHFareBalance.getOriginal(content, sng.getNum());
-	//		//System.out.println(content.getPatientName());
-			writeToOriginal(o);
+			originalList.add(o);
 		}
-		pi.setPageNum(++pageNum);
-		System.out.println("hh" + resultList.size());
-		while(pageNum <= totalPages) {
-			service.setMapper(mapper);
-			PageHelper.startPage(pageNum, pageSize);
+		
+		//写入第一页
+		System.out.println("before write:" + pageNum + ", time:"+ new Date());
+		writeToOriginal(originalList);
+		
+		
+		//判断任务完成量,如果完成，退出，如果未完成继续。
+		if (taskCurrent >= taskSize) {
+			//记录
+			DEHFareBalanceContent contentLast = resultList.get(resultList.size() - 1);
+			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameZYFYJS, new java.sql.Timestamp(new java.util.Date().getTime()),
+					"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+			updateState(newLast);
+			//获取下一页，取出时间相同的。
+			pi.setPageNum(++pageNum);
+			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
-			
-			it = resultList.iterator();
-			while(it.hasNext()) {
-				DEHFareBalanceContent content = (DEHFareBalanceContent) it.next();
+			originalList = new ArrayList();
+			for(int i = 0; i < resultList.size(); i++) {
+				DEHFareBalanceContent content = resultList.get(i);
+				if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+					break;
+				}
 				Original o = DEHFareBalance.getOriginal(content, sng.getNum());
-				writeToOriginal(o);
+				originalList.add(o);
 			}
+			if(originalList.size() > 0) {
+				writeToOriginal(originalList);
+			}
+			return;
+		}
+		System.out.println("after write:" + pageNum + ", time:"+ new Date());
+		
+		//获取后续页
+		long totalPages = pi.getPages();
+		pi.setPageNum(++pageNum);
+		while(pageNum <= totalPages) {
+			originalList = new ArrayList();
+			service.setMapper(mapper);
+			
+			System.out.println("find a page:" + pageNum + ", time:"+ new Date());
+			PageHelper.startPage(pageNum, pageSize);	
+			resultList = service.findByPage(vas);
+			taskCurrent += resultList.size();
+			System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+			for(int i = 0; i < resultList.size(); i++) {
+				DEHFareBalanceContent content = resultList.get(i);
+				Original o = DEHFareBalance.getOriginal(content, sng.getNum());
+				originalList.add(o);
+			}
+			System.out.println("before write:" + pageNum + ", time:"+ new Date());
+			writeToOriginal(originalList);
+			if (taskCurrent >= taskSize) {
+				//记录
+				DEHFareBalanceContent contentLast = resultList.get(resultList.size() - 1);
+				ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameZYFYJS, new java.sql.Timestamp(new java.util.Date().getTime()),
+						"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+				updateState(newLast);
+				//获取下一页，取出时间相同的。
+				pi.setPageNum(++pageNum);
+				PageHelper.startPage(pageNum, pageSize);	
+				resultList = service.findByPage(vas);
+				originalList = new ArrayList();
+				for(int i = 0; i < resultList.size(); i++) {
+					DEHFareBalanceContent content = resultList.get(i);
+					if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+						break;
+					}
+					Original o = DEHFareBalance.getOriginal(content, sng.getNum());
+					originalList.add(o);
+				}
+				if(originalList.size() > 0) {
+					writeToOriginal(originalList);
+				}
+				return;
+			}
+			System.out.println("after write:" + pageNum + ", time:"+ new Date());
+			pi.setPageNum(++pageNum);
 		}
 		
 		//如果有新的，更新记录。
@@ -136,44 +300,118 @@ public class ConversionTask {
 			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameZYFYJS, new java.sql.Timestamp(new java.util.Date().getTime()),
 					"1", new java.sql.Timestamp(content.getSubmitDate().getTime()));
 			updateState(newLast);
-		}
-		
+		}	
 		logger.info("住院费用结算转存完毕。");
 	}
 	public void carryDEHFareDetail() {
-		ViewAccessState vas = lastAccess(CommonCode.ViewNameZYSFMX);
-		System.out.println(vas.getSubmitDate() + "----" + vas.getAccessDate());
+		//如果任务数量完成，退出。
+		if(taskCurrent >= taskSize) {return;}
+		
+		//获取数据库操作类.
 		DEHFareDetailContentServiceImpl service = SpringBeanUtil.getBean("dehFareDetailContentService");
 		DEHFareDetailContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DEHFareDetailContentMapper.class);
-		//切换数据库，并设置mapper.
 		service.setMapper(mapper);
 		
+		//数据库list
 		List<DEHFareDetailContent> resultList = null;
+		List<Original> originalList = new ArrayList();
+		
 		int pageNum = 1;
-		Page<DEHFareDetailContent> page = PageHelper.startPage(pageNum, pageSize);
+		
+		//上次访问状态.
+		ViewAccessState vas = lastAccess(CommonCode.ViewNameZYSFMX);
+		//获取第一页
+		Page<DEHFareDetailContent> page = PageHelper.startPage(pageNum, pageSize);		
+		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
 		PageInfo<DEHFareDetailContent> pi = new PageInfo<DEHFareDetailContent>(page);
-		//总页数
-		long totalPages = pi.getPages();
-		Iterator<DEHFareDetailContent> it = resultList.iterator();
-		while(it.hasNext()) {
-			DEHFareDetailContent content = (DEHFareDetailContent) it.next();
+		taskCurrent += resultList.size();
+		System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+		
+		//转换第一页
+		for(int i = 0; i < resultList.size(); i++) {
+			DEHFareDetailContent content = resultList.get(i);
 			Original o = DEHFareDetail.getOriginal(content, sng.getNum());
-			writeToOriginal(o);
+			originalList.add(o);
 		}
-		pi.setPageNum(++pageNum);
-		System.out.println("hh" + resultList.size());
-		while(pageNum <= totalPages) {
-			service.setMapper(mapper);
-			PageHelper.startPage(pageNum, pageSize);
+		
+		//写入第一页
+		System.out.println("before write:" + pageNum + ", time:"+ new Date());
+		writeToOriginal(originalList);
+		
+		
+		//判断任务完成量,如果完成，退出，如果未完成继续。
+		if (taskCurrent >= taskSize) {
+			//记录
+			DEHFareDetailContent contentLast = resultList.get(resultList.size() - 1);
+			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameZYSFMX, new java.sql.Timestamp(new java.util.Date().getTime()),
+					"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+			updateState(newLast);
+			//获取下一页，取出时间相同的。
+			pi.setPageNum(++pageNum);
+			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
-			
-			it = resultList.iterator();
-			while(it.hasNext()) {
-				DEHFareDetailContent content = (DEHFareDetailContent) it.next();
+			originalList = new ArrayList();
+			for(int i = 0; i < resultList.size(); i++) {
+				DEHFareDetailContent content = resultList.get(i);
+				if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+					break;
+				}
 				Original o = DEHFareDetail.getOriginal(content, sng.getNum());
-				writeToOriginal(o);
+				originalList.add(o);
 			}
+			if(originalList.size() > 0) {
+				writeToOriginal(originalList);
+			}
+			return;
+		}
+		System.out.println("after write:" + pageNum + ", time:"+ new Date());
+		
+		//获取后续页
+		long totalPages = pi.getPages();
+		pi.setPageNum(++pageNum);
+		while(pageNum <= totalPages) {
+			originalList = new ArrayList();
+			service.setMapper(mapper);
+			
+			System.out.println("find a page:" + pageNum + ", time:"+ new Date());
+			PageHelper.startPage(pageNum, pageSize);	
+			resultList = service.findByPage(vas);
+			taskCurrent += resultList.size();
+			System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+			for(int i = 0; i < resultList.size(); i++) {
+				DEHFareDetailContent content = resultList.get(i);
+				Original o = DEHFareDetail.getOriginal(content, sng.getNum());
+				originalList.add(o);
+			}
+			System.out.println("before write:" + pageNum + ", time:"+ new Date());
+			writeToOriginal(originalList);
+			if (taskCurrent >= taskSize) {
+				//记录
+				DEHFareDetailContent contentLast = resultList.get(resultList.size() - 1);
+				ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameZYSFMX, new java.sql.Timestamp(new java.util.Date().getTime()),
+						"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+				updateState(newLast);
+				//获取下一页，取出时间相同的。
+				pi.setPageNum(++pageNum);
+				PageHelper.startPage(pageNum, pageSize);	
+				resultList = service.findByPage(vas);
+				originalList = new ArrayList();
+				for(int i = 0; i < resultList.size(); i++) {
+					DEHFareDetailContent content = resultList.get(i);
+					if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+						break;
+					}
+					Original o = DEHFareDetail.getOriginal(content, sng.getNum());
+					originalList.add(o);
+				}
+				if(originalList.size() > 0) {
+					writeToOriginal(originalList);
+				}
+				return;
+			}
+			System.out.println("after write:" + pageNum + ", time:"+ new Date());
+			pi.setPageNum(++pageNum);
 		}
 		
 		//如果有新的，更新记录。
@@ -182,44 +420,118 @@ public class ConversionTask {
 			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameZYSFMX, new java.sql.Timestamp(new java.util.Date().getTime()),
 					"1", new java.sql.Timestamp(content.getSubmitDate().getTime()));
 			updateState(newLast);
-		}
+		}	
 		logger.info("住院费用明细转存完毕。");
 	}
 	public void carryDEHDrugAdvice() {
-		ViewAccessState vas = lastAccess(CommonCode.ViewNameZYYZZB);
-		System.out.println(vas.getSubmitDate());
+		//如果任务数量完成，退出。
+		if(taskCurrent >= taskSize) {return;}
+		
+		//获取数据库操作类.
 		DEHDrugAdviceContentServiceImpl service = SpringBeanUtil.getBean("dehDrugAdviceContentService");
 		DEHDrugAdviceContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DEHDrugAdviceContentMapper.class);
-		//切换数据库，并设置mapper.
 		service.setMapper(mapper);
 		
+		//数据库list
 		List<DEHDrugAdviceContent> resultList = null;
+		List<Original> originalList = new ArrayList();
+		
 		int pageNum = 1;
-		Page<DEHDrugAdviceContent> page = PageHelper.startPage(pageNum, pageSize);
+		
+		//上次访问状态.
+		ViewAccessState vas = lastAccess(CommonCode.ViewNameZYYZZB);
+		//获取第一页
+		Page<DEHDrugAdviceContent> page = PageHelper.startPage(pageNum, pageSize);		
+		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
 		PageInfo<DEHDrugAdviceContent> pi = new PageInfo<DEHDrugAdviceContent>(page);
-		//总页数
-		long totalPages = pi.getPages();
-		Iterator<DEHDrugAdviceContent> it = resultList.iterator();
-		while(it.hasNext()) {
-			DEHDrugAdviceContent content = (DEHDrugAdviceContent) it.next();
+		taskCurrent += resultList.size();
+		System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+		
+		//转换第一页
+		for(int i = 0; i < resultList.size(); i++) {
+			DEHDrugAdviceContent content = resultList.get(i);
 			Original o = DEHDrugAdvice.getOriginal(content, sng.getNum());
-	//		//System.out.println(content.getPatientName());
-			writeToOriginal(o);
+			originalList.add(o);
 		}
-		pi.setPageNum(++pageNum);
-		System.out.println("hh" + resultList.size());
-		while(pageNum <= totalPages) {
-			service.setMapper(mapper);
-			PageHelper.startPage(pageNum, pageSize);
+		
+		//写入第一页
+		System.out.println("before write:" + pageNum + ", time:"+ new Date());
+		writeToOriginal(originalList);
+		
+		
+		//判断任务完成量,如果完成，退出，如果未完成继续。
+		if (taskCurrent >= taskSize) {
+			//记录
+			DEHDrugAdviceContent contentLast = resultList.get(resultList.size() - 1);
+			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameZYYZZB, new java.sql.Timestamp(new java.util.Date().getTime()),
+					"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+			updateState(newLast);
+			//获取下一页，取出时间相同的。
+			pi.setPageNum(++pageNum);
+			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
-			
-			it = resultList.iterator();
-			while(it.hasNext()) {
-				DEHDrugAdviceContent content = (DEHDrugAdviceContent) it.next();
+			originalList = new ArrayList();
+			for(int i = 0; i < resultList.size(); i++) {
+				DEHDrugAdviceContent content = resultList.get(i);
+				if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+					break;
+				}
 				Original o = DEHDrugAdvice.getOriginal(content, sng.getNum());
-				writeToOriginal(o);
+				originalList.add(o);
 			}
+			if(originalList.size() > 0) {
+				writeToOriginal(originalList);
+			}
+			return;
+		}
+		System.out.println("after write:" + pageNum + ", time:"+ new Date());
+		
+		//获取后续页
+		long totalPages = pi.getPages();
+		pi.setPageNum(++pageNum);
+		while(pageNum <= totalPages) {
+			originalList = new ArrayList();
+			service.setMapper(mapper);
+			
+			System.out.println("find a page:" + pageNum + ", time:"+ new Date());
+			PageHelper.startPage(pageNum, pageSize);	
+			resultList = service.findByPage(vas);
+			taskCurrent += resultList.size();
+			System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+			for(int i = 0; i < resultList.size(); i++) {
+				DEHDrugAdviceContent content = resultList.get(i);
+				Original o = DEHDrugAdvice.getOriginal(content, sng.getNum());
+				originalList.add(o);
+			}
+			System.out.println("before write:" + pageNum + ", time:"+ new Date());
+			writeToOriginal(originalList);
+			if (taskCurrent >= taskSize) {
+				//记录
+				DEHDrugAdviceContent contentLast = resultList.get(resultList.size() - 1);
+				ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameZYYZZB, new java.sql.Timestamp(new java.util.Date().getTime()),
+						"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+				updateState(newLast);
+				//获取下一页，取出时间相同的。
+				pi.setPageNum(++pageNum);
+				PageHelper.startPage(pageNum, pageSize);	
+				resultList = service.findByPage(vas);
+				originalList = new ArrayList();
+				for(int i = 0; i < resultList.size(); i++) {
+					DEHDrugAdviceContent content = resultList.get(i);
+					if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+						break;
+					}
+					Original o = DEHDrugAdvice.getOriginal(content, sng.getNum());
+					originalList.add(o);
+				}
+				if(originalList.size() > 0) {
+					writeToOriginal(originalList);
+				}
+				return;
+			}
+			System.out.println("after write:" + pageNum + ", time:"+ new Date());
+			pi.setPageNum(++pageNum);
 		}
 		
 		//如果有新的，更新记录。
@@ -228,44 +540,118 @@ public class ConversionTask {
 			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameZYYZZB, new java.sql.Timestamp(new java.util.Date().getTime()),
 					"1", new java.sql.Timestamp(content.getSubmitDate().getTime()));
 			updateState(newLast);
-		}
+		}	
 		logger.info("住院医嘱主表转存完毕。");
 	}
 	public void carryDEHRegistration() {
-		ViewAccessState vas = lastAccess(CommonCode.ViewNameZYFWDJ);
-		System.out.println(vas.getSubmitDate());
+		//如果任务数量完成，退出。
+		if(taskCurrent >= taskSize) {return;}
+		
+		//获取数据库操作类.
 		DEHRegistrationContentServiceImpl service = SpringBeanUtil.getBean("dehRegistrationContentService");
 		DEHRegistrationContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DEHRegistrationContentMapper.class);
-		//切换数据库，并设置mapper.
 		service.setMapper(mapper);
 		
+		//数据库list
 		List<DEHRegistrationContent> resultList = null;
+		List<Original> originalList = new ArrayList();
+		
 		int pageNum = 1;
-		Page<DEHRegistrationContent> page = PageHelper.startPage(pageNum, pageSize);
+		
+		//上次访问状态.
+		ViewAccessState vas = lastAccess(CommonCode.ViewNameZYFWDJ);
+		//获取第一页
+		Page<DEHRegistrationContent> page = PageHelper.startPage(pageNum, pageSize);		
+		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
 		PageInfo<DEHRegistrationContent> pi = new PageInfo<DEHRegistrationContent>(page);
-		//总页数
-		long totalPages = pi.getPages();
-		Iterator<DEHRegistrationContent> it = resultList.iterator();
-		while(it.hasNext()) {
-			DEHRegistrationContent content = (DEHRegistrationContent) it.next();
+		taskCurrent += resultList.size();
+		System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+		
+		//转换第一页
+		for(int i = 0; i < resultList.size(); i++) {
+			DEHRegistrationContent content = resultList.get(i);
 			Original o = DEHRegistration.getOriginal(content, sng.getNum());
-	//		//System.out.println(content.getPatientName());
-			writeToOriginal(o);
+			originalList.add(o);
 		}
-		pi.setPageNum(++pageNum);
-		System.out.println("hh" + resultList.size());
-		while(pageNum <= totalPages) {
-			service.setMapper(mapper);
-			PageHelper.startPage(pageNum, pageSize);
+		
+		//写入第一页
+		System.out.println("before write:" + pageNum + ", time:"+ new Date());
+		writeToOriginal(originalList);
+		
+		
+		//判断任务完成量,如果完成，退出，如果未完成继续。
+		if (taskCurrent >= taskSize) {
+			//记录
+			DEHRegistrationContent contentLast = resultList.get(resultList.size() - 1);
+			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameZYFWDJ, new java.sql.Timestamp(new java.util.Date().getTime()),
+					"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+			updateState(newLast);
+			//获取下一页，取出时间相同的。
+			pi.setPageNum(++pageNum);
+			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
-			
-			it = resultList.iterator();
-			while(it.hasNext()) {
-				DEHRegistrationContent content = (DEHRegistrationContent) it.next();
+			originalList = new ArrayList();
+			for(int i = 0; i < resultList.size(); i++) {
+				DEHRegistrationContent content = resultList.get(i);
+				if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+					break;
+				}
 				Original o = DEHRegistration.getOriginal(content, sng.getNum());
-				writeToOriginal(o);
+				originalList.add(o);
 			}
+			if(originalList.size() > 0) {
+				writeToOriginal(originalList);
+			}
+			return;
+		}
+		System.out.println("after write:" + pageNum + ", time:"+ new Date());
+		
+		//获取后续页
+		long totalPages = pi.getPages();
+		pi.setPageNum(++pageNum);
+		while(pageNum <= totalPages) {
+			originalList = new ArrayList();
+			service.setMapper(mapper);
+			
+			System.out.println("find a page:" + pageNum + ", time:"+ new Date());
+			PageHelper.startPage(pageNum, pageSize);	
+			resultList = service.findByPage(vas);
+			taskCurrent += resultList.size();
+			System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+			for(int i = 0; i < resultList.size(); i++) {
+				DEHRegistrationContent content = resultList.get(i);
+				Original o = DEHRegistration.getOriginal(content, sng.getNum());
+				originalList.add(o);
+			}
+			System.out.println("before write:" + pageNum + ", time:"+ new Date());
+			writeToOriginal(originalList);
+			if (taskCurrent >= taskSize) {
+				//记录
+				DEHRegistrationContent contentLast = resultList.get(resultList.size() - 1);
+				ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameZYFWDJ, new java.sql.Timestamp(new java.util.Date().getTime()),
+						"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+				updateState(newLast);
+				//获取下一页，取出时间相同的。
+				pi.setPageNum(++pageNum);
+				PageHelper.startPage(pageNum, pageSize);	
+				resultList = service.findByPage(vas);
+				originalList = new ArrayList();
+				for(int i = 0; i < resultList.size(); i++) {
+					DEHRegistrationContent content = resultList.get(i);
+					if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+						break;
+					}
+					Original o = DEHRegistration.getOriginal(content, sng.getNum());
+					originalList.add(o);
+				}
+				if(originalList.size() > 0) {
+					writeToOriginal(originalList);
+				}
+				return;
+			}
+			System.out.println("after write:" + pageNum + ", time:"+ new Date());
+			pi.setPageNum(++pageNum);
 		}
 		
 		//如果有新的，更新记录。
@@ -274,7 +660,7 @@ public class ConversionTask {
 			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameZYFWDJ, new java.sql.Timestamp(new java.util.Date().getTime()),
 					"1", new java.sql.Timestamp(content.getSubmitDate().getTime()));
 			updateState(newLast);
-		}
+		}	
 		logger.info("住院登记转存完毕。");
 	}
 	
@@ -283,40 +669,114 @@ public class ConversionTask {
 	
 	
 	public void carryDECTreatmentRecords() {
-		ViewAccessState vas = lastAccess(CommonCode.ViewNameMZJZJL);
-		System.out.println(vas.getSubmitDate());
+		//如果任务数量完成，退出。
+		if(taskCurrent >= taskSize) {return;}
+		
+		//获取数据库操作类.
 		DECTreatmentRecordsContentServiceImpl service = SpringBeanUtil.getBean("decTreatmentRecordsContentService");
 		DECTreatmentRecordsContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DECTreatmentRecordsContentMapper.class);
-		//切换数据库，并设置mapper.
 		service.setMapper(mapper);
 		
+		//数据库list
 		List<DECTreatmentRecordsContent> resultList = null;
+		List<Original> originalList = new ArrayList();
+		
 		int pageNum = 1;
-		Page<DECTreatmentRecordsContent> page = PageHelper.startPage(pageNum, pageSize);
+		
+		//上次访问状态.
+		ViewAccessState vas = lastAccess(CommonCode.ViewNameMZJZJL);
+		//获取第一页
+		Page<DECTreatmentRecordsContent> page = PageHelper.startPage(pageNum, pageSize);		
+		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
 		PageInfo<DECTreatmentRecordsContent> pi = new PageInfo<DECTreatmentRecordsContent>(page);
-		//总页数
-		long totalPages = pi.getPages();
-		Iterator<DECTreatmentRecordsContent> it = resultList.iterator();
-		while(it.hasNext()) {
-			DECTreatmentRecordsContent content = (DECTreatmentRecordsContent) it.next();
+		taskCurrent += resultList.size();
+		System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+		
+		//转换第一页
+		for(int i = 0; i < resultList.size(); i++) {
+			DECTreatmentRecordsContent content = resultList.get(i);
 			Original o = DECTreatmentRecords.getOriginal(content, sng.getNum());
-	//		//System.out.println(content.getPatientName());
-			writeToOriginal(o);
+			originalList.add(o);
 		}
-		pi.setPageNum(++pageNum);
-		System.out.println("hh" + resultList.size());
-		while(pageNum <= totalPages) {
-			service.setMapper(mapper);
-			PageHelper.startPage(pageNum, pageSize);
+		
+		//写入第一页
+		System.out.println("before write:" + pageNum + ", time:"+ new Date());
+		writeToOriginal(originalList);
+		
+		
+		//判断任务完成量,如果完成，退出，如果未完成继续。
+		if (taskCurrent >= taskSize) {
+			//记录
+			DECTreatmentRecordsContent contentLast = resultList.get(resultList.size() - 1);
+			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameMZJZJL, new java.sql.Timestamp(new java.util.Date().getTime()),
+					"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+			updateState(newLast);
+			//获取下一页，取出时间相同的。
+			pi.setPageNum(++pageNum);
+			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
-			
-			it = resultList.iterator();
-			while(it.hasNext()) {
-				DECTreatmentRecordsContent content = (DECTreatmentRecordsContent) it.next();
+			originalList = new ArrayList();
+			for(int i = 0; i < resultList.size(); i++) {
+				DECTreatmentRecordsContent content = resultList.get(i);
+				if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+					break;
+				}
 				Original o = DECTreatmentRecords.getOriginal(content, sng.getNum());
-				writeToOriginal(o);
+				originalList.add(o);
 			}
+			if(originalList.size() > 0) {
+				writeToOriginal(originalList);
+			}
+			return;
+		}
+		System.out.println("after write:" + pageNum + ", time:"+ new Date());
+		
+		//获取后续页
+		long totalPages = pi.getPages();
+		pi.setPageNum(++pageNum);
+		while(pageNum <= totalPages) {
+			originalList = new ArrayList();
+			service.setMapper(mapper);
+			
+			System.out.println("find a page:" + pageNum + ", time:"+ new Date());
+			PageHelper.startPage(pageNum, pageSize);	
+			resultList = service.findByPage(vas);
+			taskCurrent += resultList.size();
+			System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+			for(int i = 0; i < resultList.size(); i++) {
+				DECTreatmentRecordsContent content = resultList.get(i);
+				Original o = DECTreatmentRecords.getOriginal(content, sng.getNum());
+				originalList.add(o);
+			}
+			System.out.println("before write:" + pageNum + ", time:"+ new Date());
+			writeToOriginal(originalList);
+			if (taskCurrent >= taskSize) {
+				//记录
+				DECTreatmentRecordsContent contentLast = resultList.get(resultList.size() - 1);
+				ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameMZJZJL, new java.sql.Timestamp(new java.util.Date().getTime()),
+						"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+				updateState(newLast);
+				//获取下一页，取出时间相同的。
+				pi.setPageNum(++pageNum);
+				PageHelper.startPage(pageNum, pageSize);	
+				resultList = service.findByPage(vas);
+				originalList = new ArrayList();
+				for(int i = 0; i < resultList.size(); i++) {
+					DECTreatmentRecordsContent content = resultList.get(i);
+					if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+						break;
+					}
+					Original o = DECTreatmentRecords.getOriginal(content, sng.getNum());
+					originalList.add(o);
+				}
+				if(originalList.size() > 0) {
+					writeToOriginal(originalList);
+				}
+				return;
+			}
+			System.out.println("after write:" + pageNum + ", time:"+ new Date());
+			pi.setPageNum(++pageNum);
 		}
 		
 		//如果有新的，更新记录。
@@ -325,45 +785,120 @@ public class ConversionTask {
 			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameMZJZJL, new java.sql.Timestamp(new java.util.Date().getTime()),
 					"1", new java.sql.Timestamp(content.getSubmitDate().getTime()));
 			updateState(newLast);
-		}
+		}	
 		logger.info("门诊诊疗记录转存完毕。");
 	}
 	
-	public void carryDECRegistration() {
-		ViewAccessState vas = lastAccess(CommonCode.ViewNameMZZLDJ);
-		System.out.println(vas.getSubmitDate());
+	public void carryDECRegistration() {		
+
+		//如果任务数量完成，退出。
+		if(taskCurrent >= taskSize) {return;}
+		
+		//获取数据库操作类.
 		DECRegistrationContentServiceImpl service = SpringBeanUtil.getBean("decRegistrationContentService");
 		DECRegistrationContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DECRegistrationContentMapper.class);
-		//切换数据库，并设置mapper.
 		service.setMapper(mapper);
 		
+		//数据库list
 		List<DECRegistrationContent> resultList = null;
+		List<Original> originalList = new ArrayList();
+		
 		int pageNum = 1;
-		Page<DECRegistrationContent> page = PageHelper.startPage(pageNum, pageSize);
+		
+		//上次访问状态.
+		ViewAccessState vas = lastAccess(CommonCode.ViewNameMZZLDJ);
+		//获取第一页
+		Page<DECRegistrationContent> page = PageHelper.startPage(pageNum, pageSize);		
+		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
 		PageInfo<DECRegistrationContent> pi = new PageInfo<DECRegistrationContent>(page);
-		//总页数
-		long totalPages = pi.getPages();
-		Iterator<DECRegistrationContent> it = resultList.iterator();
-		while(it.hasNext()) {
-			DECRegistrationContent content = (DECRegistrationContent) it.next();
+		taskCurrent += resultList.size();
+		System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+		
+		//转换第一页
+		for(int i = 0; i < resultList.size(); i++) {
+			DECRegistrationContent content = resultList.get(i);
 			Original o = DECRegistration.getOriginal(content, sng.getNum());
-	//		//System.out.println(content.getPatientName());
-			writeToOriginal(o);
+			originalList.add(o);
 		}
-		pi.setPageNum(++pageNum);
-		System.out.println("hh" + resultList.size());
-		while(pageNum <= totalPages) {
-			service.setMapper(mapper);
-			PageHelper.startPage(pageNum, pageSize);
+		
+		//写入第一页
+		System.out.println("before write:" + pageNum + ", time:"+ new Date());
+		writeToOriginal(originalList);
+		
+		
+		//判断任务完成量,如果完成，退出，如果未完成继续。
+		if (taskCurrent >= taskSize) {
+			//记录
+			DECRegistrationContent contentLast = resultList.get(resultList.size() - 1);
+			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameMZZLDJ, new java.sql.Timestamp(new java.util.Date().getTime()),
+					"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+			updateState(newLast);
+			//获取下一页，取出时间相同的。
+			pi.setPageNum(++pageNum);
+			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
-			
-			it = resultList.iterator();
-			while(it.hasNext()) {
-				DECRegistrationContent content = (DECRegistrationContent) it.next();
+			originalList = new ArrayList();
+			for(int i = 0; i < resultList.size(); i++) {
+				DECRegistrationContent content = resultList.get(i);
+				if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+					break;
+				}
 				Original o = DECRegistration.getOriginal(content, sng.getNum());
-				writeToOriginal(o);
+				originalList.add(o);
 			}
+			if(originalList.size() > 0) {
+				writeToOriginal(originalList);
+			}
+			return;
+		}
+		System.out.println("after write:" + pageNum + ", time:"+ new Date());
+		
+		//获取后续页
+		long totalPages = pi.getPages();
+		pi.setPageNum(++pageNum);
+		while(pageNum <= totalPages) {
+			originalList = new ArrayList();
+			service.setMapper(mapper);
+			
+			System.out.println("find a page:" + pageNum + ", time:"+ new Date());
+			PageHelper.startPage(pageNum, pageSize);	
+			resultList = service.findByPage(vas);
+			taskCurrent += resultList.size();
+			System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+			for(int i = 0; i < resultList.size(); i++) {
+				DECRegistrationContent content = resultList.get(i);
+				Original o = DECRegistration.getOriginal(content, sng.getNum());
+				originalList.add(o);
+			}
+			System.out.println("before write:" + pageNum + ", time:"+ new Date());
+			writeToOriginal(originalList);
+			if (taskCurrent >= taskSize) {
+				//记录
+				DECRegistrationContent contentLast = resultList.get(resultList.size() - 1);
+				ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameMZZLDJ, new java.sql.Timestamp(new java.util.Date().getTime()),
+						"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+				updateState(newLast);
+				//获取下一页，取出时间相同的。
+				pi.setPageNum(++pageNum);
+				PageHelper.startPage(pageNum, pageSize);	
+				resultList = service.findByPage(vas);
+				originalList = new ArrayList();
+				for(int i = 0; i < resultList.size(); i++) {
+					DECRegistrationContent content = resultList.get(i);
+					if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+						break;
+					}
+					Original o = DECRegistration.getOriginal(content, sng.getNum());
+					originalList.add(o);
+				}
+				if(originalList.size() > 0) {
+					writeToOriginal(originalList);
+				}
+				return;
+			}
+			System.out.println("after write:" + pageNum + ", time:"+ new Date());
+			pi.setPageNum(++pageNum);
 		}
 		
 		//如果有新的，更新记录。
@@ -372,45 +907,119 @@ public class ConversionTask {
 			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameMZZLDJ, new java.sql.Timestamp(new java.util.Date().getTime()),
 					"1", new java.sql.Timestamp(content.getSubmitDate().getTime()));
 			updateState(newLast);
-		}
+		}	
 		logger.info("门诊诊疗登记转存完毕。");
 	}
 	
 	public void carryDECFareDetail() {
-		ViewAccessState vas = lastAccess(CommonCode.ViewNameMZSFMX);
-		System.out.println(vas.getSubmitDate());
+		//如果任务数量完成，退出。
+		if(taskCurrent >= taskSize) {return;}
+		
+		//获取数据库操作类.
 		DECFareDetailContentServiceImpl service = SpringBeanUtil.getBean("decFareDetailContentService");
 		DECFareDetailContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DECFareDetailContentMapper.class);
-		//切换数据库，并设置mapper.
 		service.setMapper(mapper);
 		
+		//数据库list
 		List<DECFareDetailContent> resultList = null;
+		List<Original> originalList = new ArrayList();
+		
 		int pageNum = 1;
-		Page<DECFareDetailContent> page = PageHelper.startPage(pageNum, pageSize);
+		
+		//上次访问状态.
+		ViewAccessState vas = lastAccess(CommonCode.ViewNameMZSFMX);
+		//获取第一页
+		Page<DECFareDetailContent> page = PageHelper.startPage(pageNum, pageSize);		
+		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
 		PageInfo<DECFareDetailContent> pi = new PageInfo<DECFareDetailContent>(page);
-		//总页数
-		long totalPages = pi.getPages();
-		Iterator<DECFareDetailContent> it = resultList.iterator();
-		while(it.hasNext()) {
-			DECFareDetailContent content = (DECFareDetailContent) it.next();
+		taskCurrent += resultList.size();
+		System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+		
+		//转换第一页
+		for(int i = 0; i < resultList.size(); i++) {
+			DECFareDetailContent content = resultList.get(i);
 			Original o = DECFareDetail.getOriginal(content, sng.getNum());
-	//		//System.out.println(content.getPatientName());
-			writeToOriginal(o);
+			originalList.add(o);
 		}
-		pi.setPageNum(++pageNum);
-		System.out.println("hh" + resultList.size());
-		while(pageNum <= totalPages) {
-			service.setMapper(mapper);
-			PageHelper.startPage(pageNum, pageSize);
+		
+		//写入第一页
+		System.out.println("before write:" + pageNum + ", time:"+ new Date());
+		writeToOriginal(originalList);
+		
+		
+		//判断任务完成量,如果完成，退出，如果未完成继续。
+		if (taskCurrent >= taskSize) {
+			//记录
+			DECFareDetailContent contentLast = resultList.get(resultList.size() - 1);
+			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameMZSFMX, new java.sql.Timestamp(new java.util.Date().getTime()),
+					"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+			updateState(newLast);
+			//获取下一页，取出时间相同的。
+			pi.setPageNum(++pageNum);
+			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
-			
-			it = resultList.iterator();
-			while(it.hasNext()) {
-				DECFareDetailContent content = (DECFareDetailContent) it.next();
+			originalList = new ArrayList();
+			for(int i = 0; i < resultList.size(); i++) {
+				DECFareDetailContent content = resultList.get(i);
+				if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+					break;
+				}
 				Original o = DECFareDetail.getOriginal(content, sng.getNum());
-				writeToOriginal(o);
+				originalList.add(o);
 			}
+			if(originalList.size() > 0) {
+				writeToOriginal(originalList);
+			}
+			return;
+		}
+		System.out.println("after write:" + pageNum + ", time:"+ new Date());
+		
+		//获取后续页
+		long totalPages = pi.getPages();
+		pi.setPageNum(++pageNum);
+		while(pageNum <= totalPages) {
+			originalList = new ArrayList();
+			service.setMapper(mapper);
+			
+			System.out.println("find a page:" + pageNum + ", time:"+ new Date());
+			PageHelper.startPage(pageNum, pageSize);	
+			resultList = service.findByPage(vas);
+			taskCurrent += resultList.size();
+			System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+			for(int i = 0; i < resultList.size(); i++) {
+				DECFareDetailContent content = resultList.get(i);
+				Original o = DECFareDetail.getOriginal(content, sng.getNum());
+				originalList.add(o);
+			}
+			System.out.println("before write:" + pageNum + ", time:"+ new Date());
+			writeToOriginal(originalList);
+			if (taskCurrent >= taskSize) {
+				//记录
+				DECFareDetailContent contentLast = resultList.get(resultList.size() - 1);
+				ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameMZSFMX, new java.sql.Timestamp(new java.util.Date().getTime()),
+						"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+				updateState(newLast);
+				//获取下一页，取出时间相同的。
+				pi.setPageNum(++pageNum);
+				PageHelper.startPage(pageNum, pageSize);	
+				resultList = service.findByPage(vas);
+				originalList = new ArrayList();
+				for(int i = 0; i < resultList.size(); i++) {
+					DECFareDetailContent content = resultList.get(i);
+					if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+						break;
+					}
+					Original o = DECFareDetail.getOriginal(content, sng.getNum());
+					originalList.add(o);
+				}
+				if(originalList.size() > 0) {
+					writeToOriginal(originalList);
+				}
+				return;
+			}
+			System.out.println("after write:" + pageNum + ", time:"+ new Date());
+			pi.setPageNum(++pageNum);
 		}
 		
 		//如果有新的，更新记录。
@@ -422,41 +1031,117 @@ public class ConversionTask {
 		}
 		logger.info("门诊费用明细转存完毕。");
 	}
+	
+	
 	public void carryDECFareBalance() {
-		ViewAccessState vas = lastAccess(CommonCode.ViewNameMZFYJS);
-		System.out.println(vas.getSubmitDate());
+		//如果任务数量完成，退出。
+		if(taskCurrent >= taskSize) {return;}
+		
+		//获取数据库操作类.
 		DECFareBalanceContentServiceImpl service = SpringBeanUtil.getBean("decFareBalanceContentService");
 		DECFareBalanceContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DECFareBalanceContentMapper.class);
-		//切换数据库，并设置mapper.
 		service.setMapper(mapper);
 		
+		//数据库list
 		List<DECFareBalanceContent> resultList = null;
+		List<Original> originalList = new ArrayList();
+		
 		int pageNum = 1;
-		Page<DECFareBalanceContent> page = PageHelper.startPage(pageNum, pageSize);
+		
+		//上次访问状态.
+		ViewAccessState vas = lastAccess(CommonCode.ViewNameMZFYJS);
+		//获取第一页
+		Page<DECFareBalanceContent> page = PageHelper.startPage(pageNum, pageSize);		
+		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
 		PageInfo<DECFareBalanceContent> pi = new PageInfo<DECFareBalanceContent>(page);
-		//总页数
-		long totalPages = pi.getPages();
-		Iterator<DECFareBalanceContent> it = resultList.iterator();
-		while(it.hasNext()) {
-			DECFareBalanceContent content = (DECFareBalanceContent) it.next();
+		taskCurrent += resultList.size();
+		System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+		
+		//转换第一页
+		for(int i = 0; i < resultList.size(); i++) {
+			DECFareBalanceContent content = resultList.get(i);
 			Original o = DECFareBalance.getOriginal(content, sng.getNum());
-	//		//System.out.println(content.getPatientName());
-			writeToOriginal(o);
+			originalList.add(o);
 		}
-		pi.setPageNum(++pageNum);
-		System.out.println("hh" + resultList.size());
-		while(pageNum <= totalPages) {
-			service.setMapper(mapper);
-			PageHelper.startPage(pageNum, pageSize);
+		
+		//写入第一页
+		System.out.println("before write:" + pageNum + ", time:"+ new Date());
+		writeToOriginal(originalList);
+		
+		
+		//判断任务完成量,如果完成，退出，如果未完成继续。
+		if (taskCurrent >= taskSize) {
+			//记录
+			DECFareBalanceContent contentLast = resultList.get(resultList.size() - 1);
+			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameMZFYJS, new java.sql.Timestamp(new java.util.Date().getTime()),
+					"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+			updateState(newLast);
+			//获取下一页，取出时间相同的。
+			pi.setPageNum(++pageNum);
+			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
-			
-			it = resultList.iterator();
-			while(it.hasNext()) {
-				DECFareBalanceContent content = (DECFareBalanceContent) it.next();
+			originalList = new ArrayList();
+			for(int i = 0; i < resultList.size(); i++) {
+				DECFareBalanceContent content = resultList.get(i);
+				if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+					break;
+				}
 				Original o = DECFareBalance.getOriginal(content, sng.getNum());
-				writeToOriginal(o);
+				originalList.add(o);
 			}
+			if(originalList.size() > 0) {
+				writeToOriginal(originalList);
+			}
+			return;
+		}
+		System.out.println("after write:" + pageNum + ", time:"+ new Date());
+		
+		//获取后续页
+		long totalPages = pi.getPages();
+		pi.setPageNum(++pageNum);
+		while(pageNum <= totalPages) {
+			originalList = new ArrayList();
+			service.setMapper(mapper);
+			
+			System.out.println("find a page:" + pageNum + ", time:"+ new Date());
+			PageHelper.startPage(pageNum, pageSize);	
+			resultList = service.findByPage(vas);
+			taskCurrent += resultList.size();
+			System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+			for(int i = 0; i < resultList.size(); i++) {
+				DECFareBalanceContent content = resultList.get(i);
+				Original o = DECFareBalance.getOriginal(content, sng.getNum());
+				originalList.add(o);
+			}
+			System.out.println("before write:" + pageNum + ", time:"+ new Date());
+			writeToOriginal(originalList);
+			if (taskCurrent >= taskSize) {
+				//记录
+				DECFareBalanceContent contentLast = resultList.get(resultList.size() - 1);
+				ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameMZFYJS, new java.sql.Timestamp(new java.util.Date().getTime()),
+						"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+				updateState(newLast);
+				//获取下一页，取出时间相同的。
+				pi.setPageNum(++pageNum);
+				PageHelper.startPage(pageNum, pageSize);	
+				resultList = service.findByPage(vas);
+				originalList = new ArrayList();
+				for(int i = 0; i < resultList.size(); i++) {
+					DECFareBalanceContent content = resultList.get(i);
+					if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+						break;
+					}
+					Original o = DECFareBalance.getOriginal(content, sng.getNum());
+					originalList.add(o);
+				}
+				if(originalList.size() > 0) {
+					writeToOriginal(originalList);
+				}
+				return;
+			}
+			System.out.println("after write:" + pageNum + ", time:"+ new Date());
+			pi.setPageNum(++pageNum);
 		}
 		
 		//如果有新的，更新记录。
@@ -470,40 +1155,114 @@ public class ConversionTask {
 	}
 	
 	public void carryDECDrugAdvice() {
-		ViewAccessState vas = lastAccess(CommonCode.ViewNameMZCFZB);
-		System.out.println(vas.getSubmitDate());
+		//如果任务数量完成，退出。
+		if(taskCurrent >= taskSize) {return;}
+		
+		//获取数据库操作类.
 		DECDrugAdviceContentServiceImpl service = SpringBeanUtil.getBean("decDrugAdviceContentService");
 		DECDrugAdviceContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DECDrugAdviceContentMapper.class);
-		//切换数据库，并设置mapper.
 		service.setMapper(mapper);
 		
+		//数据库list
 		List<DECDrugAdviceContent> resultList = null;
+		List<Original> originalList = new ArrayList();
+		
 		int pageNum = 1;
-		Page<DECDrugAdviceContent> page = PageHelper.startPage(pageNum, pageSize);
+		
+		//上次访问状态.
+		ViewAccessState vas = lastAccess(CommonCode.ViewNameMZCFZB);
+		//获取第一页
+		Page<DECDrugAdviceContent> page = PageHelper.startPage(pageNum, pageSize);		
+		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
 		PageInfo<DECDrugAdviceContent> pi = new PageInfo<DECDrugAdviceContent>(page);
-		//总页数
-		long totalPages = pi.getPages();
-		Iterator<DECDrugAdviceContent> it = resultList.iterator();
-		while(it.hasNext()) {
-			DECDrugAdviceContent content = (DECDrugAdviceContent) it.next();
+		taskCurrent += resultList.size();
+		System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+		
+		//转换第一页
+		for(int i = 0; i < resultList.size(); i++) {
+			DECDrugAdviceContent content = resultList.get(i);
 			Original o = DECDrugAdvice.getOriginal(content, sng.getNum());
-	//		//System.out.println(content.getPatientName());
-			writeToOriginal(o);
+			originalList.add(o);
 		}
-		pi.setPageNum(++pageNum);
-		System.out.println("hh" + resultList.size());
-		while(pageNum <= totalPages) {
-			service.setMapper(mapper);
-			PageHelper.startPage(pageNum, pageSize);
+		
+		//写入第一页
+		System.out.println("before write:" + pageNum + ", time:"+ new Date());
+		writeToOriginal(originalList);
+		
+		
+		//判断任务完成量,如果完成，退出，如果未完成继续。
+		if (taskCurrent >= taskSize) {
+			//记录
+			DECDrugAdviceContent contentLast = resultList.get(resultList.size() - 1);
+			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameMZCFZB, new java.sql.Timestamp(new java.util.Date().getTime()),
+					"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+			updateState(newLast);
+			//获取下一页，取出时间相同的。
+			pi.setPageNum(++pageNum);
+			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
-			
-			it = resultList.iterator();
-			while(it.hasNext()) {
-				DECDrugAdviceContent content = (DECDrugAdviceContent) it.next();
+			originalList = new ArrayList();
+			for(int i = 0; i < resultList.size(); i++) {
+				DECDrugAdviceContent content = resultList.get(i);
+				if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+					break;
+				}
 				Original o = DECDrugAdvice.getOriginal(content, sng.getNum());
-				writeToOriginal(o);
+				originalList.add(o);
 			}
+			if(originalList.size() > 0) {
+				writeToOriginal(originalList);
+			}
+			return;
+		}
+		System.out.println("after write:" + pageNum + ", time:"+ new Date());
+		
+		//获取后续页
+		long totalPages = pi.getPages();
+		pi.setPageNum(++pageNum);
+		while(pageNum <= totalPages) {
+			originalList = new ArrayList();
+			service.setMapper(mapper);
+			
+			System.out.println("find a page:" + pageNum + ", time:"+ new Date());
+			PageHelper.startPage(pageNum, pageSize);	
+			resultList = service.findByPage(vas);
+			taskCurrent += resultList.size();
+			System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+			for(int i = 0; i < resultList.size(); i++) {
+				DECDrugAdviceContent content = resultList.get(i);
+				Original o = DECDrugAdvice.getOriginal(content, sng.getNum());
+				originalList.add(o);
+			}
+			System.out.println("before write:" + pageNum + ", time:"+ new Date());
+			writeToOriginal(originalList);
+			if (taskCurrent >= taskSize) {
+				//记录
+				DECDrugAdviceContent contentLast = resultList.get(resultList.size() - 1);
+				ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameMZCFZB, new java.sql.Timestamp(new java.util.Date().getTime()),
+						"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+				updateState(newLast);
+				//获取下一页，取出时间相同的。
+				pi.setPageNum(++pageNum);
+				PageHelper.startPage(pageNum, pageSize);	
+				resultList = service.findByPage(vas);
+				originalList = new ArrayList();
+				for(int i = 0; i < resultList.size(); i++) {
+					DECDrugAdviceContent content = resultList.get(i);
+					if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+						break;
+					}
+					Original o = DECDrugAdvice.getOriginal(content, sng.getNum());
+					originalList.add(o);
+				}
+				if(originalList.size() > 0) {
+					writeToOriginal(originalList);
+				}
+				return;
+			}
+			System.out.println("after write:" + pageNum + ", time:"+ new Date());
+			pi.setPageNum(++pageNum);
 		}
 		
 		//如果有新的，更新记录。
@@ -516,40 +1275,115 @@ public class ConversionTask {
 		logger.info("门诊医嘱主表转存完毕。");
 	}
 	public void carryDECDrugAdviceDetail() {
-		ViewAccessState vas = lastAccess(CommonCode.ViewNameMZCFMX);
-		System.out.println(vas.getSubmitDate());
+		//如果任务数量完成，退出。
+		if(taskCurrent >= taskSize) {return;}
+		
+		//获取数据库操作类.
 		DECDrugAdviceDetailContentServiceImpl service = SpringBeanUtil.getBean("decDrugAdviceDetailContentService");
 		DECDrugAdviceDetailContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DECDrugAdviceDetailContentMapper.class);
-		//切换数据库，并设置mapper.
 		service.setMapper(mapper);
 		
+		//数据库list
 		List<DECDrugAdviceDetailContent> resultList = null;
+		List<Original> originalList = new ArrayList();
+		
 		int pageNum = 1;
-		Page<DECDrugAdviceDetailContent> page = PageHelper.startPage(pageNum, pageSize);
+		
+		//上次访问状态.
+		ViewAccessState vas = lastAccess(CommonCode.ViewNameMZCFMX);
+		//获取第一页
+		Page<DECDrugAdviceDetailContent> page = PageHelper.startPage(pageNum, pageSize);		
+		System.out.println("find a page:" + pageNum + ", time:"+ new Date());
 		resultList = service.findByPage(vas);
 		PageInfo<DECDrugAdviceDetailContent> pi = new PageInfo<DECDrugAdviceDetailContent>(page);
-		//总页数
-		long totalPages = pi.getPages();
-		Iterator<DECDrugAdviceDetailContent> it = resultList.iterator();
-		while(it.hasNext()) {
-			DECDrugAdviceDetailContent content = (DECDrugAdviceDetailContent) it.next();
+		taskCurrent += resultList.size();
+		System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+		
+		//转换第一页
+		for(int i = 0; i < resultList.size(); i++) {
+			DECDrugAdviceDetailContent content = resultList.get(i);
 			Original o = DECDrugAdviceDetail.getOriginal(content, sng.getNum());
-	//		//System.out.println(content.getPatientName());
-			writeToOriginal(o);
+			originalList.add(o);
 		}
-		pi.setPageNum(++pageNum);
-		System.out.println("hh" + resultList.size());
-		while(pageNum <= totalPages) {
-			service.setMapper(mapper);
-			PageHelper.startPage(pageNum, pageSize);
+		
+		//写入第一页
+		System.out.println("before write:" + pageNum + ", time:"+ new Date());
+		writeToOriginal(originalList);
+		
+		
+		//判断任务完成量,如果完成，退出，如果未完成继续。
+		if (taskCurrent >= taskSize) {
+			//记录
+			DECDrugAdviceDetailContent contentLast = resultList.get(resultList.size() - 1);
+			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameMZCFMX, new java.sql.Timestamp(new java.util.Date().getTime()),
+					"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+			updateState(newLast);
+			//获取下一页，取出时间相同的。
+			pi.setPageNum(++pageNum);
+			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
-			
-			it = resultList.iterator();
-			while(it.hasNext()) {
-				DECDrugAdviceDetailContent content = (DECDrugAdviceDetailContent) it.next();
+			originalList = new ArrayList();
+			for(int i = 0; i < resultList.size(); i++) {
+				DECDrugAdviceDetailContent content = resultList.get(i);
+				if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+					break;
+				}
 				Original o = DECDrugAdviceDetail.getOriginal(content, sng.getNum());
-				writeToOriginal(o);
+				originalList.add(o);
 			}
+			if(originalList.size() > 0) {
+				writeToOriginal(originalList);
+			}
+			return;
+		}
+		System.out.println("after write:" + pageNum + ", time:"+ new Date());
+		
+		//获取后续页
+		long totalPages = pi.getPages();
+		pi.setPageNum(++pageNum);
+		while(pageNum <= totalPages) {
+			originalList = new ArrayList();
+			service.setMapper(mapper);
+			
+			System.out.println("find a page:" + pageNum + ", time:"+ new Date());
+			PageHelper.startPage(pageNum, pageSize);	
+			resultList = service.findByPage(vas);
+			taskCurrent += resultList.size();
+			System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
+			for(int i = 0; i < resultList.size(); i++) {
+				DECDrugAdviceDetailContent content = resultList.get(i);
+				Original o = DECDrugAdviceDetail.getOriginal(content, sng.getNum());
+				originalList.add(o);
+			}
+			System.out.println("before write:" + pageNum + ", time:"+ new Date());
+			writeToOriginal(originalList);
+			if (taskCurrent >= taskSize) {
+				//记录
+				DECDrugAdviceDetailContent contentLast = resultList.get(resultList.size() - 1);
+				ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameMZCFMX, new java.sql.Timestamp(new java.util.Date().getTime()),
+						"1", new java.sql.Timestamp(contentLast.getSubmitDate().getTime()));
+				updateState(newLast);
+				//获取下一页，取出时间相同的。
+				pi.setPageNum(++pageNum);
+				PageHelper.startPage(pageNum, pageSize);	
+				resultList = service.findByPage(vas);
+				originalList = new ArrayList();
+				for(int i = 0; i < resultList.size(); i++) {
+					DECDrugAdviceDetailContent content = resultList.get(i);
+					if(!content.getSubmitDate().equals(contentLast.getSubmitDate())) {
+						break;
+					}
+					Original o = DECDrugAdviceDetail.getOriginal(content, sng.getNum());
+					originalList.add(o);
+				}
+				if(originalList.size() > 0) {
+					System.out.println("same time size" + originalList.size());
+					writeToOriginal(originalList);
+				}
+				return;
+			}
+			System.out.println("after write:" + pageNum + ", time:"+ new Date());
+			pi.setPageNum(++pageNum);
 		}
 		
 		//如果有新的，更新记录。
@@ -562,11 +1396,11 @@ public class ConversionTask {
 		logger.info("门诊医嘱明细转存完毕。");
 	}
 		
-	private void writeToOriginal(Original o) {
+	private void writeToOriginal(List<Original> ol) {
 		OriginalServiceImpl service = SpringBeanUtil.getBean("originalService");
 		OriginalMapper mapper = SpringBeanUtil.getApplicationContext().getBean(OriginalMapper.class);
 		service.setMapper(mapper);
-		service.insert(o);
+		service.insertBatch(ol);
 	}
 
 	private ViewAccessState lastAccess(String viewName) {

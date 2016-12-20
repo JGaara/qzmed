@@ -39,6 +39,10 @@ public class ConvertionTaskTest {
 	@Test
 	public void testConvertion() {
 		ConversionTask task = new ConversionTask();
-		task.convert();
+		if(0 == task.convert()) {
+			System.out.println("chenggong");
+		} else {
+			System.out.println("shibai");
+		}
 	}
 }
