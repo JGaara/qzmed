@@ -136,14 +136,15 @@
 	
 	<!-- 定时器的配置 -->
 	<bean id = "conversionTask" class="com.zehin.vpaas.generic.ConversionTask"/>
-	<task:scheduler id="scheduler" pool-size="10" />
+	<bean id = "dynamicScheduler" class = "com.zehin.vpaas.generic.DynamicScheduler" />
+	<!-- <task:scheduler id="scheduler" pool-size="10" />
 	<task:scheduled-tasks scheduler="scheduler">
-        <task:scheduled ref="conversionTask" method="convert" cron="0 0 0/1 * * ?"/>
+        <task:scheduled ref="conversionTask" method="convert" cron="0 0/1 * * * ?"/>
     </task:scheduled-tasks>  
     <task:executor id="executor" keep-alive="3600" pool-size="100-200" 
     	queue-capacity="500" rejection-policy="CALLER_RUNS" /> 
     <task:annotation-driven executor="executor" scheduler="scheduler" />
-	
+	 -->
 	<!-- redis 配置 -->
 	<bean id="jedisConnectionFactory"
 		class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
@@ -244,9 +245,12 @@
 	</bean>
 	<bean id = "originalService" class = "com.zehin.vpaas.service.impl.OriginalServiceImpl">
 	</bean>
+	<bean id = "conveLogService" class = "com.zehin.vpaas.service.impl.ConveLogServiceImpl">
+	</bean>
 	<bean id = "viewAccessStateService" class = "com.zehin.vpaas.service.impl.ViewAccessStateServiceimpl">
 	</bean>
-	
+	<bean id = "failLogService" class = "com.zehin.vpaas.service.impl.FailLogServiceImpl">
+	</bean>
 	
 </beans>
 					

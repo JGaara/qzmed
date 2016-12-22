@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.zehin.vpaas.mapper.FailLogMapper">
+	
+	<resultMap id="rtmpFailLog" type="com.zehin.vpaas.beans.FailLog" >
+				<result column="ViewName" property="ViewName" jdbcType="VARCHAR"/>
+				<result column="FailTime" property="FailTime" jdbcType="TIMESTAMP"/>
+				<result column="FailMsg" property="FailMsg" jdbcType="VARCHAR"/>
+				
+  	</resultMap>
+  	
+  	<sql id="Base_Column_List" >
+	  		ViewName,
+			FailTime,
+			FailMsg
+ 	</sql>
+ 	
+ 	
+ 	<!-- 根据id查询 -->
+<!-- 	<select id="selectByPrimaryKey" resultMap="rtmpFailLog">
+	    SELECT 
+	    <include refid="Base_Column_List" />
+	    FROM FailLog
+	    WHERE ViewName = #{ViewName}
+ 	 </select>
+ -->	
+	<!-- 查询所有 -->
+	<select id="findAll" resultMap="rtmpFailLog" 
+	    parameterType="com.zehin.vpaas.beans.FailLog">
+		select
+		<include refid="Base_Column_List" />
+		from FailLog
+	</select>
+	
+	<insert id="log" parameterType="com.zehin.vpaas.beans.FailLog">
+		insert into FailLog (ViewName, FailTime, FailMsg) values (
+			#{ViewName,  jdbcType=VARCHAR},#{FailTime, jdbcType=TIMESTAMP},#{FailMsg, jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	
+</mapper>

@@ -1,4 +1,6 @@
 package com.zehin.vpaas.generic;
+import java.sql.Timestamp;
+
 import java.util.*;
 
 import org.apache.log4j.Logger;
@@ -9,23 +11,44 @@ import com.zehin.vpaas.common.util.SpringBeanUtil;
 import com.zehin.vpaas.mapper.*;
 import com.zehin.vpaas.service.impl.*;
 import com.github.pagehelper.*;
+
 public class ConversionTask {
     private SerialNumGenerator sng;
-    private final int pageSize = 60000;
+    private final int pageSize = 10000;
     private final int taskSize = 1000000;
+    private int isAuto = -1;
     private int taskCurrent = 0;
     private static Logger logger = Logger.getLogger("ConversionTask.class");
     public ConversionTask() {
+    	isAuto = -1;
     	taskCurrent = 0;
     	sng = new SerialNumGenerator();
+    	System.out.println("start the task");
     }
     
+    public int couvertByHand() {
+    	if (isAuto != -1) {
+    		//其他任务正在运行。
+    		updateFailLog(null,  new Date(), "task aready running");
+    		return 2;
+    	}
+    	isAuto = 0;
+    	int state = convert();
+    	isAuto = -1;
+    	return state;
+    }
     /**
      * 
      * @return 0.正常结束     1.失败。
      */
 	public int convert() {
+		if (isAuto != -1) {
+			//其他任务正在运行。
+    		updateFailLog(null,  new Date(), "task aready running");
+    		return 2;
+		}
 		try {
+		isAuto = 1;
 		logger.info("启动转存...");
 		//门诊诊疗登记
 		carryDECRegistration();
@@ -34,7 +57,7 @@ public class ConversionTask {
 		//门诊处方主表
 		carryDECDrugAdvice();
 		//门诊处方明细
-		carryDECDrugAdviceDetail();
+	//	carryDECDrugAdviceDetail();
 		//门诊收费明细
 		carryDECFareDetail();
 		//门诊费用结算
@@ -52,9 +75,12 @@ public class ConversionTask {
 		//住院费用结算
 		carryDEHFareBalance();
 		logger.info("转存完毕...");
+		isAuto = -1;
 		return 0;
 		} catch(Exception e) {
+			isAuto = -1;
 			e.printStackTrace();
+			updateFailLog(null,  new Date(), e.getMessage());
 			logger.info(e.getStackTrace());
 			return 1;
 			
@@ -65,7 +91,8 @@ public class ConversionTask {
 	public void carryDEHDrugAdviceDetail() {
 		//如果任务数量完成，退出。
 		if(taskCurrent >= taskSize) {return;}
-		
+		int count = 0;
+		Date startTime = new Date();
 		//获取数据库操作类.
 		DEHDrugAdviceDetailContentServiceImpl service = SpringBeanUtil.getBean("dehDrugAdviceDetailContentService");
 		DEHDrugAdviceDetailContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DEHDrugAdviceDetailContentMapper.class);
@@ -86,6 +113,7 @@ public class ConversionTask {
 		resultList = service.findByPage(vas);
 		PageInfo<DEHDrugAdviceDetailContent> pi = new PageInfo<DEHDrugAdviceDetailContent>(page);
 		taskCurrent += resultList.size();
+		
 		System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
 		
 		//转换第一页
@@ -98,7 +126,7 @@ public class ConversionTask {
 		//写入第一页
 		System.out.println("before write:" + pageNum + ", time:"+ new Date());
 		writeToOriginal(originalList);
-		
+		count += resultList.size();
 		
 		//判断任务完成量,如果完成，退出，如果未完成继续。
 		if (taskCurrent >= taskSize) {
@@ -123,7 +151,10 @@ public class ConversionTask {
 			}
 			if(originalList.size() > 0) {
 				writeToOriginal(originalList);
+				count += resultList.size();
 			}
+			Date endTime = new Date();
+			updateConveLog(CommonCode.ViewNameZYYZMX, count, startTime, endTime);
 			return;
 		}
 		System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -139,6 +170,7 @@ public class ConversionTask {
 			PageHelper.startPage(pageNum, pageSize);	
 			resultList = service.findByPage(vas);
 			taskCurrent += resultList.size();
+			count += resultList.size();
 			System.out.println("after find a page:" + pageNum + ", time:"+ new Date());
 			for(int i = 0; i < resultList.size(); i++) {
 				DEHDrugAdviceDetailContent content = resultList.get(i);
@@ -147,6 +179,7 @@ public class ConversionTask {
 			}
 			System.out.println("before write:" + pageNum + ", time:"+ new Date());
 			writeToOriginal(originalList);
+			count += resultList.size();
 			if (taskCurrent >= taskSize) {
 				//记录
 				DEHDrugAdviceDetailContent contentLast = resultList.get(resultList.size() - 1);
@@ -170,12 +203,16 @@ public class ConversionTask {
 				if(originalList.size() > 0) {
 					
 					writeToOriginal(originalList);
+					count += resultList.size();
 				}
+				Date endTime = new Date();
+				updateConveLog(CommonCode.ViewNameZYYZMX, count, startTime, endTime);
 				return;
 			}
 			System.out.println("after write:" + pageNum + ", time:"+ new Date());
 			pi.setPageNum(++pageNum);
 		}
+		
 		
 		//如果有新的，更新记录。
 		if(resultList.size() > 0) {
@@ -183,13 +220,17 @@ public class ConversionTask {
 			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameZYYZMX, new java.sql.Timestamp(new java.util.Date().getTime()),
 					"1", new java.sql.Timestamp(content.getSubmitDate().getTime()));
 			updateState(newLast);
-		}		
+		}	
+		
+		Date endTime = new Date();
+		updateConveLog(CommonCode.ViewNameZYYZMX, count, startTime, endTime);
 		logger.info("住院医嘱明细转存完毕。");
 	}
 	public void carryDEHFareBalance() {
 		//如果任务数量完成，退出。
 		if(taskCurrent >= taskSize) {return;}
-		
+		int count = 0;
+		Date startTime = new Date();
 		//获取数据库操作类.
 		DEHFareBalanceContentServiceImpl service = SpringBeanUtil.getBean("dehFareBalanceContentService");
 		DEHFareBalanceContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DEHFareBalanceContentMapper.class);
@@ -222,6 +263,7 @@ public class ConversionTask {
 		//写入第一页
 		System.out.println("before write:" + pageNum + ", time:"+ new Date());
 		writeToOriginal(originalList);
+		count += resultList.size();
 		
 		
 		//判断任务完成量,如果完成，退出，如果未完成继续。
@@ -247,7 +289,10 @@ public class ConversionTask {
 			}
 			if(originalList.size() > 0) {
 				writeToOriginal(originalList);
+				count += resultList.size();
 			}
+			Date endTime = new Date();
+			updateConveLog(CommonCode.ViewNameZYFYJS, count, startTime, endTime);
 			return;
 		}
 		System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -271,6 +316,7 @@ public class ConversionTask {
 			}
 			System.out.println("before write:" + pageNum + ", time:"+ new Date());
 			writeToOriginal(originalList);
+			count += resultList.size();
 			if (taskCurrent >= taskSize) {
 				//记录
 				DEHFareBalanceContent contentLast = resultList.get(resultList.size() - 1);
@@ -293,7 +339,10 @@ public class ConversionTask {
 				}
 				if(originalList.size() > 0) {
 					writeToOriginal(originalList);
+					count += resultList.size();
 				}
+				Date endTime = new Date();
+				updateConveLog(CommonCode.ViewNameZYFYJS, count, startTime, endTime);
 				return;
 			}
 			System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -307,12 +356,15 @@ public class ConversionTask {
 					"1", new java.sql.Timestamp(content.getSubmitDate().getTime()));
 			updateState(newLast);
 		}	
+		Date endTime = new Date();
+		updateConveLog(CommonCode.ViewNameZYFYJS, count, startTime, endTime);
 		logger.info("住院费用结算转存完毕。");
 	}
 	public void carryDEHFareDetail() {
 		//如果任务数量完成，退出。
 		if(taskCurrent >= taskSize) {return;}
-		
+		int count = 0;
+		Date startTime = new Date();
 		//获取数据库操作类.
 		DEHFareDetailContentServiceImpl service = SpringBeanUtil.getBean("dehFareDetailContentService");
 		DEHFareDetailContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DEHFareDetailContentMapper.class);
@@ -345,7 +397,7 @@ public class ConversionTask {
 		//写入第一页
 		System.out.println("before write:" + pageNum + ", time:"+ new Date());
 		writeToOriginal(originalList);
-		
+		count += resultList.size();
 		
 		//判断任务完成量,如果完成，退出，如果未完成继续。
 		if (taskCurrent >= taskSize) {
@@ -370,7 +422,10 @@ public class ConversionTask {
 			}
 			if(originalList.size() > 0) {
 				writeToOriginal(originalList);
+				count += resultList.size();
 			}
+			Date endTime = new Date();
+			updateConveLog(CommonCode.ViewNameZYSFMX, count, startTime, endTime);
 			return;
 		}
 		System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -394,6 +449,7 @@ public class ConversionTask {
 			}
 			System.out.println("before write:" + pageNum + ", time:"+ new Date());
 			writeToOriginal(originalList);
+			count += resultList.size();
 			if (taskCurrent >= taskSize) {
 				//记录
 				DEHFareDetailContent contentLast = resultList.get(resultList.size() - 1);
@@ -416,7 +472,10 @@ public class ConversionTask {
 				}
 				if(originalList.size() > 0) {
 					writeToOriginal(originalList);
+					count += resultList.size();
 				}
+				Date endTime = new Date();
+				updateConveLog(CommonCode.ViewNameZYSFMX, count, startTime, endTime);
 				return;
 			}
 			System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -430,12 +489,15 @@ public class ConversionTask {
 					"1", new java.sql.Timestamp(content.getSubmitDate().getTime()));
 			updateState(newLast);
 		}	
+		Date endTime = new Date();
+		updateConveLog(CommonCode.ViewNameZYSFMX, count, startTime, endTime);
 		logger.info("住院费用明细转存完毕。");
 	}
 	public void carryDEHDrugAdvice() {
 		//如果任务数量完成，退出。
 		if(taskCurrent >= taskSize) {return;}
-		
+		int count = 0;
+		Date startTime = new Date();
 		//获取数据库操作类.
 		DEHDrugAdviceContentServiceImpl service = SpringBeanUtil.getBean("dehDrugAdviceContentService");
 		DEHDrugAdviceContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DEHDrugAdviceContentMapper.class);
@@ -468,7 +530,7 @@ public class ConversionTask {
 		//写入第一页
 		System.out.println("before write:" + pageNum + ", time:"+ new Date());
 		writeToOriginal(originalList);
-		
+		count += resultList.size();
 		
 		//判断任务完成量,如果完成，退出，如果未完成继续。
 		if (taskCurrent >= taskSize) {
@@ -493,7 +555,10 @@ public class ConversionTask {
 			}
 			if(originalList.size() > 0) {
 				writeToOriginal(originalList);
+				count += resultList.size();
 			}
+			Date endTime = new Date();
+			updateConveLog(CommonCode.ViewNameZYYZZB, count, startTime, endTime);
 			return;
 		}
 		System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -517,6 +582,7 @@ public class ConversionTask {
 			}
 			System.out.println("before write:" + pageNum + ", time:"+ new Date());
 			writeToOriginal(originalList);
+			count += resultList.size();
 			if (taskCurrent >= taskSize) {
 				//记录
 				DEHDrugAdviceContent contentLast = resultList.get(resultList.size() - 1);
@@ -539,7 +605,10 @@ public class ConversionTask {
 				}
 				if(originalList.size() > 0) {
 					writeToOriginal(originalList);
+					count += resultList.size();
 				}
+				Date endTime = new Date();
+				updateConveLog(CommonCode.ViewNameZYYZZB, count, startTime, endTime);
 				return;
 			}
 			System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -552,13 +621,16 @@ public class ConversionTask {
 			ViewAccessState newLast = new ViewAccessState(CommonCode.ViewNameZYYZZB, new java.sql.Timestamp(new java.util.Date().getTime()),
 					"1", new java.sql.Timestamp(content.getSubmitDate().getTime()));
 			updateState(newLast);
-		}	
+		}
+		Date endTime = new Date();
+		updateConveLog(CommonCode.ViewNameZYYZZB, count, startTime, endTime);
 		logger.info("住院医嘱主表转存完毕。");
 	}
 	public void carryDEHRegistration() {
 		//如果任务数量完成，退出。
 		if(taskCurrent >= taskSize) {return;}
-		
+		int count = 0;
+		Date startTime = new Date();
 		//获取数据库操作类.
 		DEHRegistrationContentServiceImpl service = SpringBeanUtil.getBean("dehRegistrationContentService");
 		DEHRegistrationContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DEHRegistrationContentMapper.class);
@@ -591,7 +663,7 @@ public class ConversionTask {
 		//写入第一页
 		System.out.println("before write:" + pageNum + ", time:"+ new Date());
 		writeToOriginal(originalList);
-		
+		count += resultList.size();
 		
 		//判断任务完成量,如果完成，退出，如果未完成继续。
 		if (taskCurrent >= taskSize) {
@@ -616,7 +688,10 @@ public class ConversionTask {
 			}
 			if(originalList.size() > 0) {
 				writeToOriginal(originalList);
+				count += resultList.size();
 			}
+			Date endTime = new Date();
+			updateConveLog(CommonCode.ViewNameZYFWDJ, count, startTime, endTime);
 			return;
 		}
 		System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -640,6 +715,7 @@ public class ConversionTask {
 			}
 			System.out.println("before write:" + pageNum + ", time:"+ new Date());
 			writeToOriginal(originalList);
+			count += resultList.size();
 			if (taskCurrent >= taskSize) {
 				//记录
 				DEHRegistrationContent contentLast = resultList.get(resultList.size() - 1);
@@ -662,7 +738,10 @@ public class ConversionTask {
 				}
 				if(originalList.size() > 0) {
 					writeToOriginal(originalList);
+					count += resultList.size();
 				}
+				Date endTime = new Date();
+				updateConveLog(CommonCode.ViewNameZYFWDJ, count, startTime, endTime);
 				return;
 			}
 			System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -676,6 +755,8 @@ public class ConversionTask {
 					"1", new java.sql.Timestamp(content.getSubmitDate().getTime()));
 			updateState(newLast);
 		}	
+		Date endTime = new Date();
+		updateConveLog(CommonCode.ViewNameZYFWDJ, count, startTime, endTime);
 		logger.info("住院登记转存完毕。");
 	}
 	
@@ -686,7 +767,8 @@ public class ConversionTask {
 	public void carryDECTreatmentRecords() {
 		//如果任务数量完成，退出。
 		if(taskCurrent >= taskSize) {return;}
-		
+		int count  = 0;
+		Date startTime = new Date();
 		//获取数据库操作类.
 		DECTreatmentRecordsContentServiceImpl service = SpringBeanUtil.getBean("decTreatmentRecordsContentService");
 		DECTreatmentRecordsContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DECTreatmentRecordsContentMapper.class);
@@ -719,7 +801,7 @@ public class ConversionTask {
 		//写入第一页
 		System.out.println("before write:" + pageNum + ", time:"+ new Date());
 		writeToOriginal(originalList);
-		
+		count += resultList.size();
 		
 		//判断任务完成量,如果完成，退出，如果未完成继续。
 		if (taskCurrent >= taskSize) {
@@ -744,7 +826,10 @@ public class ConversionTask {
 			}
 			if(originalList.size() > 0) {
 				writeToOriginal(originalList);
+				count += resultList.size();
 			}
+			Date endTime = new Date();
+			updateConveLog(CommonCode.ViewNameMZJZJL, count, startTime, endTime);
 			return;
 		}
 		System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -768,6 +853,7 @@ public class ConversionTask {
 			}
 			System.out.println("before write:" + pageNum + ", time:"+ new Date());
 			writeToOriginal(originalList);
+			count += resultList.size();
 			if (taskCurrent >= taskSize) {
 				//记录
 				DECTreatmentRecordsContent contentLast = resultList.get(resultList.size() - 1);
@@ -790,7 +876,10 @@ public class ConversionTask {
 				}
 				if(originalList.size() > 0) {
 					writeToOriginal(originalList);
+					count += resultList.size();
 				}
+				Date endTime = new Date();
+				updateConveLog(CommonCode.ViewNameMZJZJL, count, startTime, endTime);
 				return;
 			}
 			System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -804,6 +893,8 @@ public class ConversionTask {
 					"1", new java.sql.Timestamp(content.getSubmitDate().getTime()));
 			updateState(newLast);
 		}	
+		Date endTime = new Date();
+		updateConveLog(CommonCode.ViewNameMZJZJL, count, startTime, endTime);
 		logger.info("门诊诊疗记录转存完毕。");
 	}
 	
@@ -811,7 +902,8 @@ public class ConversionTask {
 
 		//如果任务数量完成，退出。
 		if(taskCurrent >= taskSize) {return;}
-		
+		int count = 0;
+		Date startTime = new Date();
 		//获取数据库操作类.
 		DECRegistrationContentServiceImpl service = SpringBeanUtil.getBean("decRegistrationContentService");
 		DECRegistrationContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DECRegistrationContentMapper.class);
@@ -843,7 +935,7 @@ public class ConversionTask {
 		//写入第一页
 		System.out.println("before write:" + pageNum + ", time:"+ new Date());
 		writeToOriginal(originalList);
-		
+		count += resultList.size();
 		
 		//判断任务完成量,如果完成，退出，如果未完成继续。
 		if (taskCurrent >= taskSize) {
@@ -868,7 +960,10 @@ public class ConversionTask {
 			}
 			if(originalList.size() > 0) {
 				writeToOriginal(originalList);
+				count += resultList.size();
 			}
+			Date endTime = new Date();
+			updateConveLog(CommonCode.ViewNameMZZLDJ, count, startTime, endTime);
 			return;
 		}
 		System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -892,6 +987,7 @@ public class ConversionTask {
 			}
 			System.out.println("before write:" + pageNum + ", time:"+ new Date());
 			writeToOriginal(originalList);
+			count += resultList.size();
 			if (taskCurrent >= taskSize) {
 				//记录
 				DECRegistrationContent contentLast = resultList.get(resultList.size() - 1);
@@ -914,7 +1010,10 @@ public class ConversionTask {
 				}
 				if(originalList.size() > 0) {
 					writeToOriginal(originalList);
+					count += resultList.size();
 				}
+				Date endTime = new Date();
+				updateConveLog(CommonCode.ViewNameMZZLDJ, count, startTime, endTime);
 				return;
 			}
 			System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -928,13 +1027,16 @@ public class ConversionTask {
 					"1", new java.sql.Timestamp(content.getSubmitDate().getTime()));
 			updateState(newLast);
 		}	
+		Date endTime = new Date();
+		updateConveLog(CommonCode.ViewNameMZZLDJ, count, startTime, endTime);
 		logger.info("门诊诊疗登记转存完毕。");
 	}
 	
 	public void carryDECFareDetail() {
 		//如果任务数量完成，退出。
 		if(taskCurrent >= taskSize) {return;}
-		
+		int count = 0;
+		Date startTime = new Date();
 		//获取数据库操作类.
 		DECFareDetailContentServiceImpl service = SpringBeanUtil.getBean("decFareDetailContentService");
 		DECFareDetailContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DECFareDetailContentMapper.class);
@@ -967,7 +1069,7 @@ public class ConversionTask {
 		//写入第一页
 		System.out.println("before write:" + pageNum + ", time:"+ new Date());
 		writeToOriginal(originalList);
-		
+		count += resultList.size();
 		
 		//判断任务完成量,如果完成，退出，如果未完成继续。
 		if (taskCurrent >= taskSize) {
@@ -992,7 +1094,10 @@ public class ConversionTask {
 			}
 			if(originalList.size() > 0) {
 				writeToOriginal(originalList);
+				count += resultList.size();
 			}
+			Date endTime = new Date();
+			updateConveLog(CommonCode.ViewNameMZSFMX, count, startTime, endTime);
 			return;
 		}
 		System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -1016,6 +1121,7 @@ public class ConversionTask {
 			}
 			System.out.println("before write:" + pageNum + ", time:"+ new Date());
 			writeToOriginal(originalList);
+			count += resultList.size();
 			if (taskCurrent >= taskSize) {
 				//记录
 				DECFareDetailContent contentLast = resultList.get(resultList.size() - 1);
@@ -1038,7 +1144,10 @@ public class ConversionTask {
 				}
 				if(originalList.size() > 0) {
 					writeToOriginal(originalList);
+					count += resultList.size();
 				}
+				Date endTime = new Date();
+				updateConveLog(CommonCode.ViewNameMZSFMX, count, startTime, endTime);
 				return;
 			}
 			System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -1052,6 +1161,8 @@ public class ConversionTask {
 					"1", new java.sql.Timestamp(content.getSubmitDate().getTime()));
 			updateState(newLast);
 		}
+		Date endTime = new Date();
+		updateConveLog(CommonCode.ViewNameMZSFMX, count, startTime, endTime);
 		logger.info("门诊费用明细转存完毕。");
 	}
 	
@@ -1059,7 +1170,8 @@ public class ConversionTask {
 	public void carryDECFareBalance() {
 		//如果任务数量完成，退出。
 		if(taskCurrent >= taskSize) {return;}
-		
+		int count = 0;
+		Date startTime = new Date();
 		//获取数据库操作类.
 		DECFareBalanceContentServiceImpl service = SpringBeanUtil.getBean("decFareBalanceContentService");
 		DECFareBalanceContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DECFareBalanceContentMapper.class);
@@ -1092,7 +1204,7 @@ public class ConversionTask {
 		//写入第一页
 		System.out.println("before write:" + pageNum + ", time:"+ new Date());
 		writeToOriginal(originalList);
-		
+		count += resultList.size();
 		
 		//判断任务完成量,如果完成，退出，如果未完成继续。
 		if (taskCurrent >= taskSize) {
@@ -1117,7 +1229,10 @@ public class ConversionTask {
 			}
 			if(originalList.size() > 0) {
 				writeToOriginal(originalList);
+				count += resultList.size();
 			}
+			Date endTime = new Date();
+			updateConveLog(CommonCode.ViewNameMZFYJS, count, startTime, endTime);
 			return;
 		}
 		System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -1141,6 +1256,7 @@ public class ConversionTask {
 			}
 			System.out.println("before write:" + pageNum + ", time:"+ new Date());
 			writeToOriginal(originalList);
+			count += resultList.size();
 			if (taskCurrent >= taskSize) {
 				//记录
 				DECFareBalanceContent contentLast = resultList.get(resultList.size() - 1);
@@ -1163,7 +1279,10 @@ public class ConversionTask {
 				}
 				if(originalList.size() > 0) {
 					writeToOriginal(originalList);
+					count += resultList.size();
 				}
+				Date endTime = new Date();
+				updateConveLog(CommonCode.ViewNameMZFYJS, count, startTime, endTime);
 				return;
 			}
 			System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -1177,13 +1296,16 @@ public class ConversionTask {
 					"1", new java.sql.Timestamp(content.getSubmitDate().getTime()));
 			updateState(newLast);
 		}
+		Date endTime = new Date();
+		updateConveLog(CommonCode.ViewNameMZFYJS, count, startTime, endTime);
 		logger.info("门诊费用结算转存完毕。");
 	}
 	
 	public void carryDECDrugAdvice() {
 		//如果任务数量完成，退出。
 		if(taskCurrent >= taskSize) {return;}
-		
+		int count = 0;
+		Date startTime = new Date();
 		//获取数据库操作类.
 		DECDrugAdviceContentServiceImpl service = SpringBeanUtil.getBean("decDrugAdviceContentService");
 		DECDrugAdviceContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DECDrugAdviceContentMapper.class);
@@ -1216,7 +1338,7 @@ public class ConversionTask {
 		//写入第一页
 		System.out.println("before write:" + pageNum + ", time:"+ new Date());
 		writeToOriginal(originalList);
-		
+		count += resultList.size();
 		
 		//判断任务完成量,如果完成，退出，如果未完成继续。
 		if (taskCurrent >= taskSize) {
@@ -1241,7 +1363,10 @@ public class ConversionTask {
 			}
 			if(originalList.size() > 0) {
 				writeToOriginal(originalList);
+				count += resultList.size();
 			}
+			Date endTime = new Date();
+			updateConveLog(CommonCode.ViewNameMZCFZB, count, startTime, endTime);
 			return;
 		}
 		System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -1265,6 +1390,7 @@ public class ConversionTask {
 			}
 			System.out.println("before write:" + pageNum + ", time:"+ new Date());
 			writeToOriginal(originalList);
+			count += resultList.size();
 			if (taskCurrent >= taskSize) {
 				//记录
 				DECDrugAdviceContent contentLast = resultList.get(resultList.size() - 1);
@@ -1287,7 +1413,10 @@ public class ConversionTask {
 				}
 				if(originalList.size() > 0) {
 					writeToOriginal(originalList);
+					count += resultList.size();
 				}
+				Date endTime = new Date();
+				updateConveLog(CommonCode.ViewNameMZCFZB, count, startTime, endTime);
 				return;
 			}
 			System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -1301,12 +1430,15 @@ public class ConversionTask {
 					"1", new java.sql.Timestamp(content.getSubmitDate().getTime()));
 			updateState(newLast);
 		}
+		Date endTime = new Date();
+		updateConveLog(CommonCode.ViewNameMZCFZB, count, startTime, endTime);
 		logger.info("门诊医嘱主表转存完毕。");
 	}
 	public void carryDECDrugAdviceDetail() {
 		//如果任务数量完成，退出。
 		if(taskCurrent >= taskSize) {return;}
-		
+		int count = 0;
+		Date startTime = new Date();
 		//获取数据库操作类.
 		DECDrugAdviceDetailContentServiceImpl service = SpringBeanUtil.getBean("decDrugAdviceDetailContentService");
 		DECDrugAdviceDetailContentMapper mapper= SpringBeanUtil.getApplicationContext().getBean(DECDrugAdviceDetailContentMapper.class);
@@ -1339,7 +1471,7 @@ public class ConversionTask {
 		//写入第一页
 		System.out.println("before write:" + pageNum + ", time:"+ new Date());
 		writeToOriginal(originalList);
-		
+		count += resultList.size();
 		
 		//判断任务完成量,如果完成，退出，如果未完成继续。
 		if (taskCurrent >= taskSize) {
@@ -1364,7 +1496,10 @@ public class ConversionTask {
 			}
 			if(originalList.size() > 0) {
 				writeToOriginal(originalList);
+				count += resultList.size();
 			}
+			Date endTime = new Date();
+			updateConveLog(CommonCode.ViewNameMZCFMX, count, startTime, endTime);
 			return;
 		}
 		System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -1388,6 +1523,7 @@ public class ConversionTask {
 			}
 			System.out.println("before write:" + pageNum + ", time:"+ new Date());
 			writeToOriginal(originalList);
+			count += resultList.size();
 			if (taskCurrent >= taskSize) {
 				//记录
 				DECDrugAdviceDetailContent contentLast = resultList.get(resultList.size() - 1);
@@ -1411,7 +1547,10 @@ public class ConversionTask {
 				if(originalList.size() > 0) {
 					System.out.println("same time size" + originalList.size());
 					writeToOriginal(originalList);
+					count += resultList.size();
 				}
+				Date endTime = new Date();
+				updateConveLog(CommonCode.ViewNameMZCFMX, count, startTime, endTime);
 				return;
 			}
 			System.out.println("after write:" + pageNum + ", time:"+ new Date());
@@ -1425,6 +1564,8 @@ public class ConversionTask {
 					"1", new java.sql.Timestamp(content.getSubmitDate().getTime()));
 			updateState(newLast);
 		}
+		Date endTime = new Date();
+		updateConveLog(CommonCode.ViewNameMZCFMX, count, startTime, endTime);
 		logger.info("门诊医嘱明细转存完毕。");
 	}
 		
@@ -1454,5 +1595,30 @@ public class ConversionTask {
 		ViewAccessStateMapper mapper = SpringBeanUtil.getApplicationContext().getBean(ViewAccessStateMapper.class);
 		service.setMapper(mapper);
 		service.addNewAccessTime(vas);
+	}
+	
+	private void updateConveLog(String viewName, int count, Date startTime, Date endTime) {
+		ConveLogServiceImpl service = SpringBeanUtil.getBean("conveLogService");
+		ConveLogMapper mapper = SpringBeanUtil.getApplicationContext().getBean(ConveLogMapper.class);
+		service.setMapper(mapper);
+		ConveLog cl = new ConveLog();
+		cl.setViewName(viewName);
+		cl.setIsAtuo(isAuto + "");
+		cl.setCount(count + "");
+		cl.setStartTime(new Timestamp(startTime.getTime()));
+		cl.setEndTime(new Timestamp(endTime.getTime()));
+		
+		service.Log(cl);
+	}
+	
+	private void updateFailLog(String viewName, Date failTime, String failMsg) {
+		FailLogServiceImpl service = SpringBeanUtil.getBean("failLogService");
+		FailLogMapper mapper = SpringBeanUtil.getApplicationContext().getBean(FailLogMapper.class);
+		service.setMapper(mapper);
+		FailLog fl = new FailLog();
+		fl.setFailMsg(failMsg);
+		fl.setViewName(viewName);
+		fl.setFailTime(new Timestamp(failTime.getTime()));
+		service.Log(fl);
 	}
 }

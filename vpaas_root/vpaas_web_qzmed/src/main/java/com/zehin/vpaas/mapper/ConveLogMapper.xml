@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.zehin.vpaas.mapper.ConveLogMapper">
+	
+	<resultMap id="rtmpConveLog" type="com.zehin.vpaas.beans.ConveLog" >
+				<result column="ViewName" property="ViewName" />
+				<result column="Count" property="Count" />
+				<result column="IsAuto" property="IsAuto" />
+				<result column="StartTime" property="StartTime"  jdbcType="TIMESTAMP"/>
+				<result column="EndTime" property="EndTime"  jdbcType="TIMESTAMP"/>
+			
+  	</resultMap>
+  	
+  	<sql id="Base_Column_List" >
+	  		ViewName,
+			Count,
+			IsAuto,
+			StartTime,
+			EndTime
+ 	</sql>
+ 	
+ 	
+ 	<!-- 根据id查询 -->
+<!-- 	<select id="selectByPrimaryKey" resultMap="rtmpConveLog">
+	    SELECT 
+	    <include refid="Base_Column_List" />
+	    FROM CONVELOG
+	    WHERE ViewName = #{ViewName}
+ 	 </select>
+ -->	
+	<!-- 查询所有 -->
+	<select id="findAll" resultMap="rtmpConveLog" 
+	    parameterType="com.zehin.vpaas.beans.ConveLog">
+		select
+		<include refid="Base_Column_List" />
+		from CONVELOG
+	</select>
+	
+	<insert id="log" parameterType="com.zehin.vpaas.beans.ConveLog">
+		insert into CONVELOG (STARTTIME, ENDTIME, VIEWNAME, COUNT, ISAUTO) values (
+			#{StartTime},#{EndTime},#{ViewName},#{Count},#{IsAuto}
+		)
+	</insert>
+	
+	
+</mapper>
