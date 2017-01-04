@@ -99,6 +99,6 @@ public class DecDrugAdviceTest {
 				SpringBeanUtil.getApplicationContext().getBean(DECDrugAdviceContentMapper.class);
 		decDrugAdviceContentService.setMapper(drcm);
 		List<DECDrugAdviceContent> decRegContent = decDrugAdviceContentService.findAll(new DECDrugAdviceContent());
-		System.out.println("size:" + decRegContent.size());
+		System.out.println("size:" + decRegContent.get(0).getSubmitDate());
 	}
 }

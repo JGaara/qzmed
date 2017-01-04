@@ -7,6 +7,9 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import com.zehin.vpaas.common.util.JaxbTimestampAdapter;
 
 /**
  * 门诊诊疗服务登记
@@ -45,6 +48,7 @@ public class DECRegistrationContent {
 	private String RegFlag;
 	private String OperatorCode;
 	private String OperatorName;
+	@XmlJavaTypeAdapter(JaxbTimestampAdapter.class)
 	private Timestamp SubmitDate;
 	private String RecordState;
 	private String ContactPhone;

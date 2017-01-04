@@ -7,7 +7,7 @@ package com.zehin.vpaas.beans;
 public class User {
 	private String name;
 	private String pwd;
-
+	private String mark;
 	public String getName() {
 		return name;
 	}
@@ -23,4 +23,13 @@ public class User {
 	public void setPwd(String pwd) {
 		this.pwd = pwd;
 	}
+
+	public String getMark() {
+		return mark;
+	}
+
+	public void setMark(String mark) {
+		this.mark = mark;
+	}
+	
 }

@@ -137,6 +137,7 @@
 	<!-- 定时器的配置 -->
 	<bean id = "conversionTask" class="com.zehin.vpaas.generic.ConversionTask"/>
 	<bean id = "dynamicScheduler" class = "com.zehin.vpaas.generic.DynamicScheduler" />
+	<bean id = "propertiesTask" class = "com.zehin.vpaas.generic.PropertiesTask" />
 	<!-- <task:scheduler id="scheduler" pool-size="10" />
 	<task:scheduled-tasks scheduler="scheduler">
         <task:scheduled ref="conversionTask" method="convert" cron="0 0/1 * * * ?"/>
@@ -250,6 +251,10 @@
 	<bean id = "viewAccessStateService" class = "com.zehin.vpaas.service.impl.ViewAccessStateServiceimpl">
 	</bean>
 	<bean id = "failLogService" class = "com.zehin.vpaas.service.impl.FailLogServiceImpl">
+	</bean>
+	<bean id = "errorsService" class = "com.zehin.vpaas.service.impl.ErrorsServiceImpl">
+	</bean>
+	<bean id = "loginService" class = "com.zehin.vpaas.service.impl.LoginServiceImpl">
 	</bean>
 	
 </beans>

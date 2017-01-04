@@ -17,7 +17,7 @@ public class DynamicScheduler implements SchedulingConfigurer {
     private String cron;
     
     public DynamicScheduler() {
-    	Properties p = (Properties)SpringBeanUtil.getBean("propertyConfigurer");
+    	Properties p = ((PropertiesTask)SpringBeanUtil.getBean("propertiesTask")).getPro();
 		cron = p.getProperty("crontab").replace("_", " ");
 		
     }

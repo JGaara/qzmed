@@ -2,11 +2,12 @@ package com.zehin.vpaas.beans;
 
 import java.sql.Date;
 import java.sql.Timestamp;
-
+import com.zehin.vpaas.common.util.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * 门诊处方主表
@@ -39,6 +40,7 @@ public class DECDrugAdviceContent {
 	private String SevenNote;
 	private String OperatorCode;
 	private String OperatorName;
+	@XmlJavaTypeAdapter(JaxbTimestampAdapter.class)
 	private Timestamp SubmitDate;
 	private String RecordState;
 	public String getSrno() {

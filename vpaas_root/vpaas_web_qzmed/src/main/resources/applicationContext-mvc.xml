@@ -6,7 +6,6 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
 		 http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket.xsd">
-
 	<mvc:default-servlet-handler />
 
 
@@ -60,10 +59,21 @@
 
 	<mvc:interceptors>
 		<mvc:interceptor>
-			<mvc:mapping path="/**" />
+			<mvc:mapping path="/" />
 			<mvc:exclude-mapping path="/common/**" />
 			<mvc:exclude-mapping path="/mobileApi/**" />
 			<mvc:exclude-mapping path="/login" />
+			<mvc:exclude-mapping path="/home" />
+			<mvc:exclude-mapping path="/error" />
+			<mvc:exclude-mapping path="/modify" />
+			<mvc:exclude-mapping path="/save" />
+			<mvc:exclude-mapping path="/submit" />
+			<mvc:exclude-mapping path="/cin"/>
+			<mvc:exclude-mapping path="/convert" />
+			<mvc:exclude-mapping path="/hand" />
+			<mvc:exclude-mapping path="/system" />
+			<mvc:exclude-mapping path="/systemSave" />
+			<mvc:exclude-mapping path="/page" />
 			<mvc:exclude-mapping path="/loginIn"/>
 			<bean class="com.zehin.vpaas.common.interceptor.UrlInterceptor" />
 		</mvc:interceptor>

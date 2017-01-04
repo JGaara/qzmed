@@ -38,6 +38,44 @@
 		from CONVELOG
 	</select>
 	
+	<!-- 查询最新转换记录 -->
+	<select id="findNew" resultMap="rtmpConveLog" 
+	    parameterType="com.zehin.vpaas.beans.ConveLog">
+		select
+		<include refid="Base_Column_List" />
+		from (select <include refid="Base_Column_List" /> from CONVELOG order by ENDTIME DESC) where ISAUTO in('0', '1') and ROWNUM &lt;= 11
+	</select>
+	<!-- 查询自动转换记录 -->
+	<select id="findAllConvert" resultMap="rtmpConveLog" 
+	    parameterType="com.zehin.vpaas.beans.ConveLog">
+	    SELECT * FROM convelog where isauto = '1'
+	</select>
+	<select id="findConvert" resultMap="rtmpConveLog" 
+	    parameterType="com.zehin.vpaas.beans.Pager">
+		select * from
+		(
+		SELECT A.*, ROWNUM RN 
+		FROM (SELECT * FROM convelog where isauto = '1' order by endtime desc) A 
+		WHERE ROWNUM &lt;= #{endRow}
+		)  
+		WHERE RN > #{startRow}
+	</select>
+	<!-- 查询手动转换记录 -->
+	<select id="findAllHand" resultMap="rtmpConveLog" 
+	    parameterType="com.zehin.vpaas.beans.ConveLog">
+	    SELECT * FROM convelog where isauto = '0'
+	</select>
+	<select id="findHand" resultMap="rtmpConveLog" 
+	    parameterType="com.zehin.vpaas.beans.Pager">
+		select * from
+		(
+		SELECT A.*, ROWNUM RN 
+		FROM (SELECT * FROM convelog where isauto = '0' order by endtime desc) A 
+		WHERE ROWNUM &lt;= #{endRow}
+		)  
+		WHERE RN > #{startRow} 
+	</select>
+	
 	<insert id="log" parameterType="com.zehin.vpaas.beans.ConveLog">
 		insert into CONVELOG (STARTTIME, ENDTIME, VIEWNAME, COUNT, ISAUTO) values (
 			#{StartTime},#{EndTime},#{ViewName},#{Count},#{IsAuto}

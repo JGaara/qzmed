@@ -55,7 +55,7 @@ public class DECRegistration {
 		dec.setContent(content);
 		
 		String bodyXml = JaxbUtil.convertToXml(dec);
-		
+		System.out.println(bodyXml);
 		Original o = new Original();
 		
 		

@@ -120,7 +120,7 @@
 			<version>5.1.30</version>
 		</dependency>
 		<!-- sql server 驱动,本地安装 -->
-		<dependency>
+		<dependency> 
 			<groupId>com.microsoft.sqlserver</groupId>
 			<artifactId>sqljdbc4</artifactId>
 			<version>4.0</version>

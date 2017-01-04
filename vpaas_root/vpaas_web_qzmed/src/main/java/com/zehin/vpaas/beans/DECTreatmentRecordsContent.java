@@ -7,6 +7,9 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import com.zehin.vpaas.common.util.JaxbTimestampAdapter;
 /**
  * 门诊就诊记录
  *
@@ -49,6 +52,7 @@ public class DECTreatmentRecordsContent {
 	private String SymptomDesc;
 	private String OperatorCode;
 	private String OperatorName;
+	@XmlJavaTypeAdapter(JaxbTimestampAdapter.class)
 	private Timestamp SubmitDate;
 	private String RecordState;
 	public String getSrno() {

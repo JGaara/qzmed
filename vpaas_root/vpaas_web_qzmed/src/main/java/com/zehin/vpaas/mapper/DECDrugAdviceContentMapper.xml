@@ -33,7 +33,7 @@
 				
 				<result column="OperatorCode" property="OperatorCode" />
 				<result column="OperatorName" property="OperatorName" />
-				<result column="SubmitDate" property="SubmitDate"  jdbcType="TIMESTAMP"/>
+				<result column="SubmitDate" property="SubmitDate"  jdbcType="DATE"/>
 				<result column="RecordState" property="RecordState" />
 			
   	</resultMap>

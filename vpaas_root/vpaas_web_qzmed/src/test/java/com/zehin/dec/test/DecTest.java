@@ -1,5 +1,7 @@
 package com.zehin.dec.test;
 
+import java.sql.Timestamp;
+
 import javax.annotation.Resource;
 
 import org.junit.After;
@@ -49,15 +51,23 @@ public class DecTest {
 	
 	@Test
 	public void testInsert(){
-		DECRegistrationContent content=new DECRegistrationContent();
-		content.setSrno("1692");
-		content.setRegNo("540003859");
-		decRegistrationContentService.insert(content);
+		//DECRegistrationContent content=new DECRegistrationContent();
+		//content.setSrno("1692");
+		//content.setRegNo("540003859");
+		//decRegistrationContentService.insert(content);
 	}
 
 	@Test
 	public void testSelect(){
-		DECRegistrationContent content=decRegistrationContentService.selectById("1692");
-		System.out.println(content.getRegNo());
+		//DECRegistrationContent content=decRegistrationContentService.selectById("1692");
+		//System.out.println(content.getRegNo());
+		Timestamp ts = new Timestamp(System.currentTimeMillis());
+		String tsStr = "2011-05-09 11:49:45";
+		try {
+			ts = Timestamp.valueOf(tsStr);
+			System.out.println(ts);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

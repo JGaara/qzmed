@@ -33,8 +33,45 @@ public class ConversionTask {
     		return 2;
     	}
     	isAuto = 0;
-    	int state = convert();
-    	isAuto = -1;
+    	int state = 0;
+    	try {
+    		logger.info("启动转存...");
+    		//门诊诊疗登记
+    		carryDECRegistration();
+    		//门诊就诊记录
+    		carryDECTreatmentRecords();
+    		//门诊处方主表
+    		carryDECDrugAdvice();
+    		//门诊处方明细
+    		carryDECDrugAdviceDetail();
+    		//门诊收费明细
+    		carryDECFareDetail();
+    		//门诊费用结算
+    		carryDECFareBalance();
+    		
+    		
+    		//住院登记
+    		carryDEHRegistration();
+    		//住院医嘱主表
+    		carryDEHDrugAdvice();
+    		//住院医嘱明细
+    		carryDEHDrugAdviceDetail();
+    		//住院费用明细
+    		carryDEHFareDetail();
+    		//住院费用结算
+    		carryDEHFareBalance();
+    		logger.info("转存完毕...");
+    		isAuto = -1;
+    		state = 0;
+    		} catch(Exception e) {
+    			isAuto = -1;
+    			e.printStackTrace();
+    			updateFailLog(null,  new Date(), e.getMessage());
+    			logger.info(e.getStackTrace());
+    			state = 1;
+    			return state;
+    			
+    		}
     	return state;
     }
     /**
@@ -57,7 +94,7 @@ public class ConversionTask {
 		//门诊处方主表
 		carryDECDrugAdvice();
 		//门诊处方明细
-	//	carryDECDrugAdviceDetail();
+		carryDECDrugAdviceDetail();
 		//门诊收费明细
 		carryDECFareDetail();
 		//门诊费用结算
