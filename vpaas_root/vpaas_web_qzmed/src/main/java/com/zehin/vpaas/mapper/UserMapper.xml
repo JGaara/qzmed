@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.zehin.vpaas.mapper.UserMapper">
+	
+	<resultMap id="rtmpUser" type="com.zehin.vpaas.beans.User" >
+				<id column="name" property="name" />
+				<result column="pwd" property="pwd" />
+				<result column="mark" property="mark" />
+  	</resultMap>
+  	
+  	<sql id="Base_Column_List" >
+	  		 name,
+			 pwd,
+			 mark	
+ 	</sql>
+ 	
+ 	
+ 	<!-- 根据id查询 -->
+	<select id="selectByPrimaryKey" resultMap="rtmpUser">
+	    SELECT 
+	    <include refid="Base_Column_List" />
+	    FROM LOGIN
+	    WHERE name = #{name}
+ 	 </select>
+	
+	<!-- 查询所有 -->
+	<select id="findAll" resultMap="rtmpUser" 
+	    parameterType="com.zehin.vpaas.beans.User">
+		select
+		<include refid="Base_Column_List" />
+		from LOGIN
+	</select>
+
+	<!-- 批量删除 -->
+	<delete id="deleteBT" parameterType="java.lang.String">
+		DELETE FROM
+		LOGIN
+		WHERE 
+			name
+		IN
+		<foreach item="idItem" collection="array" open="(" separator="," close=")">
+			'${idItem}'
+		</foreach>
+	</delete>
+	
+	<!-- 选择性插入数据 -->
+	<insert id="insertSelective" parameterType="com.zehin.vpaas.beans.User">
+		INSERT INTO login
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="name != null">
+					name,
+				</if>
+				<if test="pwd != null">
+					pwd,
+				</if>
+				<if test="mark != null">
+					mark,
+				</if>
+		</trim>
+		<trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+				<if test="name != null">
+					#{name},
+				</if>
+				<if test="pwd != null">
+					#{pwd},
+				</if>
+				<if test="mark != null">
+					#{mark},
+				</if>
+		</trim>
+	</insert>
+	
+	<!-- 保存 -->
+	<update id="updateByPrimaryKeySelective" parameterType="com.zehin.vpaas.beans.User">
+		UPDATE login
+		<set>
+				<if test="name != null">
+					name=#{name},
+				</if>
+				<if test="pwd != null">
+					pwd=#{pwd},
+				</if>
+				<if test="mark != null">
+					mark=#{mark},
+				</if>
+		</set>
+		WHERE 
+			name = #{name}
+	</update>
+	
+</mapper>

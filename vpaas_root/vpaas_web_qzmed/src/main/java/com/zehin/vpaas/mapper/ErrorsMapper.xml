@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.zehin.vpaas.mapper.ErrorsMapper">
+	
+	<resultMap id="rtmpError" type="com.zehin.vpaas.beans.Errors" >
+				<id column="RecordId" property="RecordId" />
+				<result column="ServiceType" property="ServiceType" />
+				<result column="IDCard" property="IDCard" />
+				<result column="BusinessTypeNo" property="BusinessTypeNo" />
+				<result column="BodyXml" property="BodyXml" />
+				<result column="License" property="License" />
+				<result column="AreaCode" property="AreaCode" />
+				<result column="OrgCode" property="OrgCode" />
+				<result column="OrgName" property="OrgName" />
+				<result column="DomainCode" property="DomainCode" />
+				<result column="DomainNmae" property="DomainNmae" />
+				<result column="CreateDate" property="CreateDate" />
+				<result column="UpdateDate" property="UpdateDate" />
+				<result column="ErrorInfo" property="ErrorInfo" />
+				<result column="ModifyMark" property="ModifyMark" />
+  	</resultMap>
+  	
+  	<sql id="Base_Column_List" >
+	  		 ServiceType,
+			 RecordId,
+			 IDCard,
+			 BusinessTypeNo,
+			 BodyXml,
+			 License,
+			 AreaCode,
+			 OrgCode,
+			 OrgName,
+			 DomainCode,
+			 DomainName,
+			 CreateDate,
+			 UpdateDate,
+			 ErrorInfo,
+			 ModifyMark  	
+ 	</sql>
+ 	
+ 	
+ 	<!-- 根据id查询 -->
+	<select id="selectByPrimaryKey" resultMap="rtmpError">
+	    SELECT 
+	    <include refid="Base_Column_List" />
+	    FROM error
+	    WHERE RECORDID = #{recordId}
+ 	 </select>
+	
+	<!-- 查询所有 -->
+	<select id="findAll" resultMap="rtmpError" 
+	    parameterType="com.zehin.vpaas.beans.Errors">
+		select
+		<include refid="Base_Column_List" />
+		from ERROR
+	</select>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultMap="rtmpError" 
+	    parameterType="com.zehin.vpaas.beans.Pager">
+		select * from
+		(
+		SELECT A.*, ROWNUM RN 
+		FROM (SELECT * FROM error order by UpdateDate desc) A 
+		WHERE ROWNUM &lt;= #{endRow}
+		)  
+		WHERE RN >= #{startRow}
+	</select>
+
+	<!-- 批量删除 -->
+	<delete id="deleteBT" parameterType="java.lang.String">
+		DELETE FROM
+		ERROR
+		WHERE 
+			RECORDiD
+		IN
+		<foreach item="idItem" collection="array" open="(" separator="," close=")">
+			'${idItem}'
+		</foreach>
+	</delete>
+	
+	<!-- 选择性插入数据 -->
+	<insert id="insertSelective" parameterType="com.zehin.vpaas.beans.Errors">
+		INSERT INTO ERROR
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+				<if test="recordId != null">
+					recordId,
+				</if>
+				<if test="serviceType != null">
+					serviceType,
+				</if>
+				<if test="idCard != null">
+					idCard,
+				</if>
+				<if test="businessTypeNo != null">
+					businessTypeNo,
+				</if>
+				<if test="license != null">
+					license,
+				</if>
+				<if test="areaCode != null">
+					areaCode,
+				</if>
+				<if test="orgCode != null">
+					orgCode,
+				</if>
+				<if test="orgName != null">
+					orgName,
+				</if>
+				<if test="domainCode != null">
+					domainCode,
+				</if>
+				<if test="domainName != null">
+					domainName,
+				</if>
+				<if test="createDate != null">
+					createDate,
+				</if>
+				<if test="updateDate != null">
+					updateDate,
+				</if>
+				<if test="errorInfo != null">
+					errorInfo,
+				</if>
+				<if test="modifyMark != null">
+					modifyMark,
+				</if>
+				<if test="bodyXml != null">
+					bodyXml,
+				</if>
+		</trim>
+		<trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+				<if test="recordId != null">
+					#{recordId},
+				</if>
+				<if test="serviceType != null">
+					#{serviceType},
+				</if>
+				<if test="idCard != null">
+					#{idCard},
+				</if>
+				<if test="businessTypeNo != null">
+					#{businessTypeNo},
+				</if>
+				<if test="license != null">
+					#{license},
+				</if>
+				<if test="areaCode != null">
+					#{areaCode},
+				</if>
+				<if test="orgCode != null">
+					#{orgCode},
+				</if>
+				<if test="orgName != null">
+					#{orgName},
+				</if>
+				<if test="domainCode != null">
+					#{domainCode},
+				</if>
+				<if test="domainName != null">
+					#{domainName},
+				</if>
+				<if test="createDate != null">
+					#{createDate},
+				</if>
+				<if test="updateDate != null">
+					#{updateDate},
+				</if>
+				<if test="errorInfo != null">
+					#{errorInfo},
+				</if>
+				<if test="modifyMark != null">
+					#{modifyMark},
+				</if>
+				<if test="bodyXml != null">
+					#{bodyXml},
+				</if>
+		</trim>
+	</insert>
+	
+	<!-- 保存 -->
+	<update id="updateByPrimaryKeySelective" parameterType="com.zehin.vpaas.beans.Errors">
+		UPDATE ERROR
+		<set>
+				<if test="RecordId != null">
+					RecordId = #{RecordId},
+				</if>
+				<if test="ServiceType != null">
+					ServiceType = #{ServiceType},
+				</if>
+				<if test="IDCard != null">
+					IDCard = #{IDCard},
+				</if>
+				<if test="BusinessTypeNo != null">
+					BusinessTypeNo = #{BusinessTypeNo},
+				</if>
+				<if test="License != null">
+					License = #{License},
+				</if>
+				<if test="AreaCode != null">
+					AreaCode = #{AreaCode},
+				</if>
+				<if test="OrgCode != null">
+					OrgCode = #{OrgCode},
+				</if>
+				<if test="OrgName != null">
+					OrgName = #{OrgName},
+				</if>
+				<if test="DomainCode != null">
+					DomainCode = #{DomainCode},
+				</if>
+				<if test="DomainName != null">
+					DomainName = #{DomainName},
+				</if>
+				<if test="CreateDate != null">
+					CreateDate = #{CreateDate},
+				</if>
+				<if test="UpdateDate != null">
+					UpdateDate = #{UpdateDate},
+				</if>
+				<if test="ErrorInfo != null">
+					ErrorInfo = #{ErrorInfo},
+				</if><if test="ModifyMark != null">
+					ModifyMark = #{ModifyMark},
+				</if>
+				<if test="BodyXml != null">
+					BodyXml = #{BodyXml},
+				</if>
+		</set>
+		WHERE 
+			RECORDID = #{recordId}
+	</update>
+	
+</mapper>
